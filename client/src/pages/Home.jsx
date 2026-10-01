@@ -638,8 +638,8 @@ export default function Home() {
             <div className="relative w-full aspect-video bg-black flex items-center justify-center">
               <iframe
                 className="w-full h-full border-0"
-                src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1"
-                title="QueryCore Platform Tour Demo"
+                src="https://www.youtube.com/embed/5p248YoA34Y?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1"
+                title="What is Enterprise Generative AI? - IBM Technology"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
               />
@@ -648,12 +648,12 @@ export default function Home() {
             {/* Modal Footer Description */}
             <div className="px-5 py-3 bg-[#11141b] border-t border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-slate-400">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 font-mono text-[10px] border border-amber-500/20">
-                  LIVE DEMO
+                <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 font-mono text-[10px] border border-blue-500/20">
+                  ENTERPRISE AI EXPLAINER
                 </span>
-                <span>Sub-300ms Gemini RAG &bull; Departmental Guardrails &bull; Audit Logging</span>
+                <span>IBM Technology: What is Enterprise AI, Grounding, &amp; Business ROI</span>
               </div>
-              <span className="text-slate-400 font-mono text-[11px]">SOC-2 Type II Compliant</span>
+              <span className="text-slate-400 font-mono text-[11px]">IBM / QueryCore Architecture</span>
             </div>
           </div>
         </div>
