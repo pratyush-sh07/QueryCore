@@ -30,9 +30,16 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitMiddleware, max_requests=settings.RATE_LIMIT_PER_MINUTE)
 
 # 3. Cross-Origin Resource Sharing (CORS) Middleware
+allowed_origins = list(settings.CORS_ORIGINS) if settings.CORS_ORIGINS else []
+allowed_origins.extend([
+    "https://query-core.vercel.app",
+    "https://querycore-client.onrender.com",
+])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS or ["*"],
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"^https:\/\/.*\.vercel\.app$|^https:\/\/.*\.trycloudflare\.com$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
