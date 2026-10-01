@@ -27,7 +27,7 @@ const Navbar = () => {
       case '/profile':
         return { title: 'User Account & Security', section: 'Settings' };
       default:
-        return { title: 'DocuSync AI', section: 'Workspace' };
+        return { title: 'QueryCore AI', section: 'Workspace' };
     }
   };
 

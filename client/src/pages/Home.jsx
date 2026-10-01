@@ -65,7 +65,7 @@ const QUESTIONS = [
   { dept:'Sales',       query:'What are enterprise tier pricing thresholds?',             src:'Sales_Playbook_Q4.pdf',       lat:'340ms' },
 ];
 const ANSWERS = [
-  'DocuSync AI enforces SOC-2 Type II standards. All enterprise tenant data is cryptographically isolated — your proprietary documents are never used to train external models.',
+  'QueryCore AI enforces SOC-2 Type II standards. All enterprise tenant data is cryptographically isolated — your proprietary documents are never used to train external models.',
   'Production microservices deploy via standardized Helm charts on AWS EKS. All inter-service comms require mTLS + JWT bearer authorization with 80% automated test coverage.',
   'Full-time employees receive 25 annual PTO days plus corporate holidays. Health, dental, and vision coverage begins Day 1 with a $1,200 annual wellness stipend.',
   'Standard SaaS tier is $45/user/month billed annually. Custom on-premises vector DB deployments require MSA countersigned by VP or C-level executive.',
@@ -173,7 +173,7 @@ function PhoneMockup({ className = '', style = {} }) {
           <div className="px-3 pb-3 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
             <div className="flex items-center gap-1.5 mb-1">
               <div className="w-4 h-4 rounded" style={{ background: 'linear-gradient(135deg,#2563eb,#06b6d4)' }}/>
-              <span className="text-[9px] font-bold text-white">DocuSync</span>
+              <span className="text-[9px] font-bold text-white">QueryCore</span>
             </div>
             <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
               <Search size={8} className="text-slate-500"/>
@@ -240,7 +240,7 @@ export default function Home() {
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md" style={{ background:'linear-gradient(135deg, #d9b482, #c4975f, #8c6032)' }}>
               <Sparkles className="text-[#14110d]" size={17}/>
             </div>
-            <span className="font-extrabold text-[#faf6ef] text-sm tracking-tight">DocuSync AI</span>
+            <span className="font-extrabold text-[#faf6ef] text-sm tracking-tight">QueryCore AI</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-7 text-xs font-medium text-[#b8a692]">
@@ -301,7 +301,7 @@ export default function Home() {
           </h1>
 
           <p className="text-base sm:text-lg text-[#c4b5a3] max-w-2xl mx-auto mb-10 leading-relaxed">
-            DocuSync AI turns siloed HR manuals, legal policies, and architecture docs into one verified copilot.
+            QueryCore AI turns siloed HR manuals, legal policies, and architecture docs into one verified copilot.
             <span className="text-[#faf6ef] font-semibold"> Every answer cites its exact source.</span>
           </p>
 
@@ -446,7 +446,7 @@ export default function Home() {
           <div className="text-center mb-14">
             <span className="text-xs font-mono tracking-widest text-cyan-400 uppercase">Enterprise Adoption</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-2 tracking-tight">Trusted at scale</h2>
-            <p className="text-sm text-slate-400 mt-2 max-w-xl mx-auto">DocuSync AI powers institutional knowledge for Fortune 500 teams globally.</p>
+            <p className="text-sm text-slate-400 mt-2 max-w-xl mx-auto">QueryCore AI powers institutional knowledge for Fortune 500 teams globally.</p>
           </div>
 
           {/* Global stats */}
@@ -509,7 +509,7 @@ export default function Home() {
           <div className="text-center mb-10">
             <span className="text-xs font-mono tracking-widest text-cyan-400 uppercase">Interactive Demo</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-2">Verifiable Grounding, Live</h2>
-            <p className="text-sm text-slate-400 mt-2 max-w-xl mx-auto">Click any query — watch DocuSync retrieve and cite the exact document.</p>
+            <p className="text-sm text-slate-400 mt-2 max-w-xl mx-auto">Click any query — watch QueryCore retrieve and cite the exact document.</p>
           </div>
 
           <div className="rounded-3xl overflow-hidden"
@@ -589,7 +589,7 @@ export default function Home() {
               enterprise knowledge?
             </span>
           </h2>
-          <p className="text-slate-300 text-sm mb-10 leading-relaxed">Join 127+ enterprise institutions already using DocuSync AI to eliminate knowledge silos.</p>
+          <p className="text-slate-300 text-sm mb-10 leading-relaxed">Join 127+ enterprise institutions already using QueryCore AI to eliminate knowledge silos.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link to="/register"
               className="px-8 py-4 rounded-xl text-sm font-bold text-[#14110d] hover:scale-105 transition-transform shadow-xl"
@@ -608,7 +608,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t py-10 px-6 text-center text-xs text-slate-500 font-mono"
         style={{ borderColor:'rgba(255,255,255,0.05)', background:'#06080e' }}>
-        © 2026 DocuSync AI · Enterprise AI Hackathon · Gemini 2.0 RAG · Grounded, Verified, Cited
+        © 2026 QueryCore AI · Enterprise AI Hackathon · Gemini 2.0 RAG · Grounded, Verified, Cited
       </footer>
 
       {/* Video modal */}
@@ -630,7 +630,7 @@ export default function Home() {
                 style={{ background:'rgba(37,99,235,0.85)', backdropFilter:'blur(10px)' }}>
                 <Play size={26} className="text-white ml-1"/>
               </div>
-              <p className="text-sm font-semibold text-white">DocuSync AI — Platform Tour</p>
+              <p className="text-sm font-semibold text-white">QueryCore AI — Platform Tour</p>
               <p className="text-xs text-slate-300">Backend integration in progress — Demo coming soon</p>
             </div>
           </div>

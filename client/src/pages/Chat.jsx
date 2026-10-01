@@ -4,18 +4,11 @@ import { useAuth } from '../context/AuthContext';
 import { 
   Send, 
   Bot, 
-  User, 
   Sparkles, 
   FileText, 
   RotateCcw, 
   Building2, 
-  ShieldCheck, 
-  ChevronRight,
-  AlertCircle,
-  RefreshCw,
-  Cpu,
-  Layers,
-  ArrowRight
+  ShieldCheck 
 } from 'lucide-react';
 
 const SUGGESTED_QUERIES = [
@@ -37,19 +30,18 @@ const SUGGESTED_QUERIES = [
   {
     title: 'Enterprise Pricing Tiers',
     dept: 'Sales',
-    query: 'What is the pricing model and contract requirements for DocuSync AI?'
+    query: 'What is the pricing model and contract requirements for QueryCore AI?'
   }
 ];
 
 const Chat = () => {
   const { user } = useAuth();
   const [messages, setMessages] = useState(() => {
-    const saved = localStorage.getItem('docusync_chat_history');
+    const saved = localStorage.getItem('querycore_chat_history');
     return saved ? JSON.parse(saved) : [];
   });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [selectedDept, setSelectedDept] = useState('All');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -63,7 +55,7 @@ const Chat = () => {
   }, [messages, loading]);
 
   useEffect(() => {
-    localStorage.setItem('docusync_chat_history', JSON.stringify(messages));
+    localStorage.setItem('querycore_chat_history', JSON.stringify(messages));
   }, [messages]);
 
   // Uses shared backend API contract: POST /api/chat
@@ -110,7 +102,7 @@ const Chat = () => {
       console.warn('Backend chat offline, synthesizing from local knowledge vector:', err);
       // Fallback response generator based on local corpus
       setTimeout(() => {
-        let fallbackAnswer = 'DocuSync AI RAG engine verified: ';
+        let fallbackAnswer = 'QueryCore AI RAG engine verified: ';
         let sourceDoc = 'Enterprise_Security_Policy_2026.pdf';
 
         const lowerQ = queryToSend.toLowerCase();
@@ -121,13 +113,13 @@ const Chat = () => {
           fallbackAnswer = 'Per the Microservices Deployment & Cloud Architecture documentation, all containerized microservices are deployed on AWS EKS using standardized Helm charts. All deployments enforce minimum 80% automated unit and integration test coverage and mTLS token authentication.';
           sourceDoc = 'Microservices_Cloud_Architecture.pdf';
         } else if (lowerQ.includes('pricing') || lowerQ.includes('sales') || lowerQ.includes('cost') || lowerQ.includes('tier') || lowerQ.includes('enterprise')) {
-          fallbackAnswer = 'According to the Q4 Enterprise Sales Playbook, DocuSync AI SaaS seats are priced at $45 per user/month billed annually. Custom air-gapped deployments and dedicated on-prem vector databases require an MSA countersigned by a corporate VP or executive.';
+          fallbackAnswer = 'According to the Q4 Enterprise Sales Playbook, QueryCore AI SaaS seats are priced at $45 per user/month billed annually. Custom air-gapped deployments and dedicated on-prem vector databases require an MSA countersigned by a corporate VP or executive.';
           sourceDoc = 'Q4_Sales_Playbook_Pricing.pdf';
         } else if (lowerQ.includes('soc') || lowerQ.includes('gdpr') || lowerQ.includes('security') || lowerQ.includes('training') || lowerQ.includes('compliance')) {
           fallbackAnswer = 'Per the Enterprise AI Security & Compliance Policy 2026, tenant query data is cryptographically isolated and never used for training external frontier models. All operations strictly adhere to SOC-2 Type II and GDPR mandates.';
           sourceDoc = 'Enterprise_AI_Security_Compliance_2026.pdf';
         } else {
-          fallbackAnswer = `DocuSync AI verified answer for "${queryToSend}": The internal document vector store confirms that your query complies with enterprise tenant policies and is grounded against verified company records.`;
+          fallbackAnswer = `QueryCore AI verified answer for "${queryToSend}": The internal document vector store confirms that your query complies with enterprise tenant policies and is grounded against verified company records.`;
           sourceDoc = 'Enterprise_Knowledge_Base_2026.pdf';
         }
 
@@ -153,7 +145,7 @@ const Chat = () => {
   const handleClearHistory = () => {
     if (window.confirm('Clear conversation history?')) {
       setMessages([]);
-      localStorage.removeItem('docusync_chat_history');
+      localStorage.removeItem('querycore_chat_history');
     }
   };
 
@@ -417,7 +409,7 @@ const Chat = () => {
           </button>
         </form>
         <p className="text-center text-[10px] text-[#7d6f5e] mt-2 font-mono">
-          DocuSync AI synthesizes answers only from verified company documents. Zero external data exposure.
+          QueryCore AI synthesizes answers only from verified company documents. Zero external data exposure.
         </p>
       </div>
     </div>

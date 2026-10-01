@@ -3,13 +3,12 @@ import { Link } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import {
-  FileText, Bot, ShieldCheck, TrendingUp, TrendingDown,
-  Activity, ArrowUpRight, Sparkles, Clock, Building2,
+  FileText, Bot, ShieldCheck, TrendingUp,
+  Activity, ArrowUpRight, Sparkles,
   Database, CheckCircle2, Zap, BarChart3, Users,
-  Globe, ArrowRight, RefreshCw, Cpu, Lock, ChevronRight,
-  Eye, Image as ImageIcon
+  Globe, ArrowRight, RefreshCw, Cpu, Lock,
+  Image as ImageIcon
 } from 'lucide-react';
-import CosmicCanvas from '../components/CosmicCanvas';
 
 /* ─── Animated counter hook ─── */
 function useCountUp(target, duration = 1600, start = false) {
@@ -265,11 +264,11 @@ export default function Dashboard() {
         const docs = Array.isArray(res.data) ? res.data : (res.data?.documents || []);
         if (docs.length > 0) setDocCount(docs.length);
         else {
-          const local = localStorage.getItem('docusync_documents');
+          const local = localStorage.getItem('querycore_documents');
           if (local) setDocCount(JSON.parse(local).length);
         }
       } catch {
-        const local = localStorage.getItem('docusync_documents');
+        const local = localStorage.getItem('querycore_documents');
         if (local) setDocCount(JSON.parse(local).length);
       }
     };
@@ -354,7 +353,7 @@ export default function Dashboard() {
                 >
                   <LiveDot color="#e6c89c" />
                   <Sparkles size={12} className="text-[#d9b482]" />
-                  <span>DocuSync AI · Enterprise Suite</span>
+                  <span>QueryCore AI · Enterprise Suite</span>
                 </div>
                 <div
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono text-emerald-300"
