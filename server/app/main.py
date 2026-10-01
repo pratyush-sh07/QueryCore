@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.middleware import SecurityHeadersMiddleware, RateLimitMiddleware
 from app.db.init_db import init_db
-from app.routers import auth, documents, chat, health
+from app.routers import auth, documents, chat, health, dashboard
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
