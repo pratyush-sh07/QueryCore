@@ -75,11 +75,11 @@ async def query_copilot(
     if not relevant_docs:
         relevant_docs = docs_query.limit(2).all()
 
-    # Formulate answer & citations
-    cited_sources = [d.title for d in relevant_docs] if relevant_docs else ["Enterprise_Knowledge_Base.pdf"]
-    
     lower_q = clean_query.lower()
-    # Detect specific query categories
+    cited_sources = [d.title for d in relevant_docs] if relevant_docs else ["Enterprise_Knowledge_Base.pdf"]
+    synthesized_answer = None
+
+    # Detect specific query categories (Company, Products, Where to find, Pricing)
     if any(k in lower_q for k in ["about the company", "tell me about querycore", "who are you", "what is querycore", "company info", "about your company", "who is querycore"]):
         synthesized_answer = (
             "🏢 **About QueryCore Technologies Inc.**\n\n"
@@ -130,24 +130,6 @@ async def query_copilot(
         )
         cited_sources = ["QueryCore_Platform_Directory.pdf", "QueryCore_Pricing_Guide.pdf"]
 
-    elif any(k in lower_q for k in ["pto", "leave", "vacation", "benefit", "wellness"]):
-        synthesized_answer = (
-            "According to the Employee Onboarding & Benefits Guide, full-time employees are entitled to 25 annual "
-            "paid time off (PTO) days in addition to official corporate holidays. Furthermore, comprehensive medical, "
-            "dental, and vision insurance starts on day 1 with a $1,200 annual wellness stipend. "
-            "You can review this document directly in our Knowledge Library at `/documents`."
-        )
-        cited_sources = ["Employee_Onboarding_Benefits_Guide.pdf"]
-
-    elif any(k in lower_q for k in ["eks", "kubernetes", "helm", "cloud", "deploy"]):
-        synthesized_answer = (
-            "Per the Microservices Deployment & Cloud Architecture documentation, all containerized microservices "
-            "are deployed on AWS EKS using standardized Helm charts. All deployments enforce minimum 80% automated "
-            "unit and integration test coverage and mTLS token authentication. "
-            "Find the full specification in our Engineering Knowledge Vault at `/documents`."
-        )
-        cited_sources = ["Microservices_Cloud_Architecture.pdf"]
-
     elif any(k in lower_q for k in ["pricing", "sales", "cost", "tier", "subscription", "price"]):
         synthesized_answer = (
             "💰 **QueryCore Pricing & Licensing Plans**:\n\n"
@@ -158,28 +140,20 @@ async def query_copilot(
         )
         cited_sources = ["Q4_Sales_Playbook_Pricing.pdf"]
 
-    elif any(k in lower_q for k in ["soc", "gdpr", "security", "training", "compliance", "isolation"]):
-        synthesized_answer = (
-            "Per the Enterprise AI Security & Compliance Policy 2026, tenant query data is cryptographically "
-            "isolated and never used for training external frontier models. All operations strictly adhere to "
-            "SOC-2 Type II and GDPR mandates with zero-trust departmental boundary guardrails. "
-            "Inspect the legal compliance records at `/documents`."
+    # If not a canned company/product catalog inquiry, pass through Gemini RAG service
+    if not synthesized_answer:
+        context_docs = [
+            {"id": d.id, "title": d.title, "department": d.department, "content": d.content}
+            for d in relevant_docs
+        ]
+        from app.core.gemini_service import generate_rag_response
+        rag_result = generate_rag_response(
+            query=clean_query,
+            context_docs=context_docs,
+            user_department=current_user.department if current_user else target_dept
         )
-        cited_sources = ["Enterprise_AI_Security_Compliance_2026.pdf"]
-
-    elif relevant_docs:
-        top_doc = relevant_docs[0]
-        synthesized_answer = (
-            f"Grounded response from '{top_doc.title}' ({top_doc.department}): "
-            f"{top_doc.content[:300]}... "
-            f"You can view the complete document in the Knowledge Library at `/documents`."
-        )
-    else:
-        synthesized_answer = (
-            f"QueryCore AI Copilot verified: Your query '{clean_query}' has been authenticated and checked against "
-            f"the active knowledge catalog. All enterprise data remains cryptographically isolated under QueryCore tenant guardrails. "
-            f"Explore all tools at `/documents` or `/chat`."
-        )
+        synthesized_answer = rag_result["answer"]
+        cited_sources = rag_result["cited_titles"] or [d.title for d in relevant_docs]
 
     # Log audit entry
     if current_user:
