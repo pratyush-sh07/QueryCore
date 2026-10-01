@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import FloatingChatWidget from '../components/FloatingChatWidget';
 import CosmicCanvas from '../components/CosmicCanvas';
+import LanguageSelector from '../components/LanguageSelector';
+import { useLanguage } from '../context/LanguageContext';
 
 /* ─────────────────────────────────────────
    PHOTO POOLS — hover-swap galleries
@@ -436,6 +438,7 @@ function PhoneMockup({ className = '', style = {} }) {
 ══════════════════════════════════════════ */
 export default function Home() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [activeQ, setActiveQ]   = useState(0);
   const [sim, setSim]           = useState(false);
   const [mousePos, setMousePos] = useState({ x: 760, y: 400 });
@@ -470,21 +473,22 @@ export default function Home() {
           </Link>
 
           <div className="hidden md:flex items-center gap-7 text-xs font-medium text-[#b8a692]">
-            <a href="#features" className="hover:text-[#faf6ef] transition-colors">Platform</a>
-            <a href="#products" className="hover:text-[#faf6ef] transition-colors">Products</a>
-            <a href="#demo"     className="hover:text-[#faf6ef] transition-colors">Live Demo</a>
-            <a href="#stats"    className="hover:text-[#faf6ef] transition-colors">Enterprise</a>
+            <a href="#features" className="hover:text-[#faf6ef] transition-colors">{t('nav.platform')}</a>
+            <a href="#products" className="hover:text-[#faf6ef] transition-colors">{t('nav.products')}</a>
+            <a href="#demo"     className="hover:text-[#faf6ef] transition-colors">{t('nav.liveDemo')}</a>
+            <a href="#stats"    className="hover:text-[#faf6ef] transition-colors">{t('nav.enterprise')}</a>
           </div>
 
           <div className="flex items-center gap-3">
+            <LanguageSelector />
             <Link to="/login"
               className="text-xs font-semibold text-[#eedfc8] hover:text-white px-4 py-2 rounded-xl transition-colors">
-              Sign In
+              {t('nav.signIn')}
             </Link>
             <Link to="/register"
               className="px-4 py-2 rounded-xl text-xs font-bold text-[#14110d] flex items-center gap-1.5 hover:scale-105 transition-transform shadow-lg"
               style={{ background:'linear-gradient(90deg, #d9b482, #f5e4cc, #c4975f)', boxShadow:'0 0 25px rgba(217, 180, 130, 0.35)' }}>
-              Get Started <ArrowRight size={13}/>
+              {t('nav.getStarted')} <ArrowRight size={13}/>
             </Link>
           </div>
         </nav>
@@ -520,27 +524,26 @@ export default function Home() {
           </div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight text-[#faf6ef] mb-6">
-            Your company's memory,<br/>
+            {t('hero.title1')}<br/>
             <span className="block mt-1" style={{ fontFamily:'Georgia,serif', fontStyle:'italic', fontWeight:400, background:'linear-gradient(90deg, #f5e4cc, #d9b482, #eedfc8)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
-              finally searchable.
+              {t('hero.title2')}
             </span>
           </h1>
 
           <p className="text-base sm:text-lg text-[#c4b5a3] max-w-2xl mx-auto mb-10 leading-relaxed">
-            QueryCore AI turns siloed HR manuals, legal policies, and architecture docs into one verified copilot.
-            <span className="text-[#faf6ef] font-semibold"> Every answer cites its exact source.</span>
+            {t('hero.desc')}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link to="/chat"
               className="w-full sm:w-auto px-8 py-4 rounded-xl text-sm font-bold text-[#14110d] flex items-center justify-center gap-2 hover:scale-105 transition-transform shadow-xl"
               style={{ background:'linear-gradient(90deg, #d9b482, #f5e4cc, #c4975f)', boxShadow:'0 0 40px rgba(217,180,130,0.45)' }}>
-              <Bot size={16}/> Engage AI Copilot
+              <Bot size={16}/> {t('hero.engageBtn')}
             </Link>
             <button onClick={() => setVideoOpen(true)}
               className="w-full sm:w-auto px-8 py-4 rounded-xl text-sm font-semibold text-[#eedfc8] flex items-center justify-center gap-2 hover:scale-105 transition-transform"
               style={{ background:'rgba(255,255,255,0.06)', border:'1px solid rgba(217,180,130,0.25)', backdropFilter:'blur(10px)' }}>
-              <Play size={14} className="text-[#d9b482]"/> Watch Platform Tour
+              <Play size={14} className="text-[#d9b482]"/> {t('hero.tourBtn')}
             </button>
           </div>
 

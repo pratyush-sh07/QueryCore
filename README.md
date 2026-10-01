@@ -55,6 +55,19 @@ QueryCore is an enterprise-grade AI knowledge base and retrieval-augmented gener
 * **Fuzzy Typo Tolerance**: Accurately recognizes and resolves misspelled brand queries (e.g., `amamzon`, `amazn`, `googl`, `msft`, `aapl`).
 * **Direct Official Store & Website Navigation**: Generates clickable button chips under responses routing customers directly to official websites, product stores, and cloud portals.
 
+### 3. Multi-Language Internationalization (i18n) & Language Selector
+* **Global Language Toggle**: Interactive dropdown selector (`LanguageSelector.jsx`) available in both the public landing page header (`Home.jsx`) and the authenticated application top navbar (`Navbar.jsx`).
+* **7 Supported Languages**:
+  * English (`en` 🇺🇸)
+  * Hindi / हिन्दी (`hi` 🇮🇳)
+  * Spanish / Español (`es` 🇪🇸)
+  * French / Français (`fr` 🇫🇷)
+  * German / Deutsch (`de` 🇩🇪)
+  * Japanese / 日本語 (`ja` 🇯🇵)
+  * Arabic / العربية (`ar` 🇸🇦 — includes automatic bidirectional `dir="rtl"` layout support)
+* **Persistent Preferences**: Saves user selection to `localStorage` (`'querycore_lang'`) with reactive state management across all routes via `LanguageContext.jsx`.
+* **Instant UI Translation**: Seamlessly localizes hero headlines, action buttons, portal navigation, platform section links, status badges, and AI chatbot interface labels.
+
 ---
 
 ## Repository Structure
