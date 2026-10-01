@@ -75,45 +75,22 @@ async def query_copilot(
     if not relevant_docs:
         relevant_docs = docs_query.limit(2).all()
 
-    # Formulate answer & citations
-    cited_sources = [d.title for d in relevant_docs] if relevant_docs else ["Enterprise_Knowledge_Base.pdf"]
-    
-    lower_q = clean_query.lower()
-    if any(k in lower_q for k in ["pto", "leave", "vacation", "benefit", "wellness"]):
-        synthesized_answer = (
-            "According to the Employee Onboarding & Benefits Guide, full-time employees are entitled to 25 annual "
-            "paid time off (PTO) days in addition to official corporate holidays. Furthermore, comprehensive medical, "
-            "dental, and vision insurance starts on day 1 with a $1,200 annual wellness stipend."
-        )
-    elif any(k in lower_q for k in ["eks", "kubernetes", "helm", "cloud", "deploy"]):
-        synthesized_answer = (
-            "Per the Microservices Deployment & Cloud Architecture documentation, all containerized microservices "
-            "are deployed on AWS EKS using standardized Helm charts. All deployments enforce minimum 80% automated "
-            "unit and integration test coverage and mTLS token authentication."
-        )
-    elif any(k in lower_q for k in ["pricing", "sales", "cost", "tier", "enterprise"]):
-        synthesized_answer = (
-            "According to the Q4 Enterprise Sales Playbook, QueryCore SaaS seats are priced at $45 per user/month "
-            "billed annually. Custom air-gapped deployments and dedicated on-prem vector databases require an "
-            "enterprise agreement signed by a corporate VP or executive."
-        )
-    elif any(k in lower_q for k in ["soc", "gdpr", "security", "training", "compliance"]):
-        synthesized_answer = (
-            "Per the Enterprise AI Security & Compliance Policy 2026, tenant query data is cryptographically "
-            "isolated and never used for training external frontier models. All operations strictly adhere to "
-            "SOC-2 Type II and GDPR mandates."
-        )
-    elif relevant_docs:
-        top_doc = relevant_docs[0]
-        synthesized_answer = (
-            f"Grounded response from '{top_doc.title}' ({top_doc.department}): "
-            f"{top_doc.content[:300]}..."
-        )
-    else:
-        synthesized_answer = (
-            f"QueryCore AI Copilot verified: Your query '{clean_query}' has been authenticated and checked against "
-            f"the active knowledge catalog. No conflicting governance policies found."
-        )
+    # Convert relevant documents into dictionary representations
+    context_docs = [
+        {"id": d.id, "title": d.title, "department": d.department, "content": d.content}
+        for d in relevant_docs
+    ]
+
+    # Generate grounded response via Google Gemini Enterprise RAG engine
+    from app.core.gemini_service import generate_rag_response
+    rag_result = generate_rag_response(
+        query=clean_query,
+        context_docs=context_docs,
+        user_department=current_user.department if current_user else target_dept
+    )
+
+    synthesized_answer = rag_result["answer"]
+    cited_sources = rag_result["cited_titles"] or [d.title for d in relevant_docs]
 
     # Log audit entry
     if current_user:
