@@ -72,7 +72,13 @@ const Register = () => {
         return;
       }
 
-      setError(err.response?.data?.message || 'Registration failed. Please check your details and try again.');
+      const detail = err.response?.data?.detail;
+      const errorMsg = typeof detail === 'string' 
+        ? detail 
+        : Array.isArray(detail) 
+          ? detail.map(d => d.msg || d.message).join(' | ') 
+          : (err.response?.data?.message || 'Registration failed. Please check your details and try again.');
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
