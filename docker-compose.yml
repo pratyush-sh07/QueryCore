@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------
+  # PostgreSQL Database Service
+  # ----------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: querycore-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: querycore_db
+      POSTGRES_USER: querycore
+      POSTGRES_PASSWORD: querycore_secure_pwd
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U querycore -d querycore_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - querycore-network
+
+  # ----------------------------------------------------
+  # Redis Cache & Session Broker
+  # ----------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: querycore-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - querycore-network
+
+  # ----------------------------------------------------
+  # QueryCore Backend API Service (FastAPI)
+  # ----------------------------------------------------
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: querycore-server
+    restart: unless-stopped
+    environment:
+      APP_NAME: "QueryCore Enterprise API"
+      APP_ENV: "production"
+      DATABASE_URL: "postgresql://querycore:querycore_secure_pwd@postgres:5432/querycore_db"
+      REDIS_URL: "redis://redis:6379/0"
+      SECRET_KEY: "super-secret-querycore-enterprise-jwt-key-change-in-production-2026"
+      CORS_ORIGINS: "http://localhost:3000,http://localhost:5173,http://localhost:80"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - querycore-network
+
+  # ----------------------------------------------------
+  # QueryCore Frontend Client Service (React + Vite + Nginx)
+  # ----------------------------------------------------
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: "http://localhost:8000"
+    container_name: querycore-client
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    networks:
+      - querycore-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  querycore-network:
+    driver: bridge

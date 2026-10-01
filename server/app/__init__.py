@@ -1,0 +1,1 @@
+# QueryCore Application Package
