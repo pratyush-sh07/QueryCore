@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   User, 
   Mail, 
@@ -20,6 +21,7 @@ import {
 
 const Profile = () => {
   const { user, token, logout, setUser } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [department, setDepartment] = useState(user?.department || 'Engineering');
@@ -181,7 +183,7 @@ const Profile = () => {
                 onClick={handleCopyToken}
                 className="shrink-0 text-xs text-[#d9b482] hover:text-[#fff0dc] transition font-semibold cursor-pointer"
               >
-                {copied ? 'Copied!' : 'Copy'}
+                {copied ? t('profile.copied') : t('profile.copy')}
               </button>
             </div>
             <div className="flex items-center justify-between text-[11px] text-[#8c7b69] font-mono px-1">

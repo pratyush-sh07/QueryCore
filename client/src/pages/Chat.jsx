@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   Send, 
   Bot, 
@@ -41,6 +42,7 @@ const SUGGESTED_QUERIES = [
 
 const Chat = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem('querycore_chat_history');
@@ -48,6 +50,7 @@ const Chat = () => {
   });
   const [input, setInput] = useState(() => searchParams.get('q') || '');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [selectedDept, setSelectedDept] = useState('All');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -68,7 +71,11 @@ const Chat = () => {
   const handleSendMessage = async (e, customPrompt = null) => {
     if (e) e.preventDefault();
     const queryToSend = (customPrompt || input).trim();
-    if (!queryToSend || loading) return;
+    if (!queryToSend) {
+      inputRef.current?.focus();
+      return;
+    }
+    if (loading) return;
 
     setError(null);
     const userMessage = {
@@ -455,26 +462,50 @@ const Chat = () => {
             placeholder="Ask a question about HR, legal, sales or architecture docs..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage(e);
+              }
+            }}
             disabled={loading}
             className="flex-1 px-4 py-3.5 text-xs text-[#faf6ef] placeholder-[#7d6f5e] rounded-xl outline-none transition"
             style={{
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(217, 180, 130, 0.25)',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(217, 180, 130, 0.28)',
             }}
-            onFocus={(e) => (e.target.style.borderColor = 'rgba(217, 180, 130, 0.65)')}
-            onBlur={(e) => (e.target.style.borderColor = 'rgba(217, 180, 130, 0.25)')}
+            onFocus={(e) => (e.target.style.borderColor = 'rgba(217, 180, 130, 0.75)')}
+            onBlur={(e) => (e.target.style.borderColor = 'rgba(217, 180, 130, 0.28)')}
           />
           <button
             type="submit"
-            disabled={!input.trim() || loading}
-            className="px-5 py-3.5 text-xs font-bold text-[#14110d] rounded-xl flex items-center gap-2 hover:scale-105 transition disabled:opacity-50 cursor-pointer shadow-lg shrink-0"
+            disabled={loading}
+            className={`px-5 py-3.5 text-xs font-bold rounded-xl flex items-center gap-2 transition-all duration-200 cursor-pointer shadow-lg shrink-0 ${
+              input.trim() && !loading
+                ? 'text-[#14110d] hover:scale-105 active:scale-95'
+                : 'text-[#d9b482] hover:text-white'
+            }`}
             style={{
-              background: 'linear-gradient(90deg, #d9b482, #f5e4cc, #c4975f)',
-              boxShadow: '0 0 25px rgba(217, 180, 130, 0.35)',
+              background: input.trim() && !loading
+                ? 'linear-gradient(135deg, #f5e4cc 0%, #d9b482 50%, #c4975f 100%)'
+                : 'linear-gradient(135deg, rgba(217, 180, 130, 0.25), rgba(196, 151, 95, 0.18))',
+              border: '1px solid rgba(217, 180, 130, 0.45)',
+              boxShadow: input.trim() && !loading
+                ? '0 0 25px rgba(217, 180, 130, 0.45), 0 4px 15px rgba(0,0,0,0.4)'
+                : '0 2px 8px rgba(0,0,0,0.3)',
             }}
           >
-            <span>Ask</span>
-            <Send className="w-3.5 h-3.5" />
+            {loading ? (
+              <>
+                <span>Thinking...</span>
+                <div className="w-3.5 h-3.5 border-2 border-[#14110d] border-t-transparent rounded-full animate-spin" />
+              </>
+            ) : (
+              <>
+                <span>Ask</span>
+                <Send className="w-3.5 h-3.5" />
+              </>
+            )}
           </button>
         </form>
         <p className="text-center text-[10px] text-[#7d6f5e] mt-2 font-mono">

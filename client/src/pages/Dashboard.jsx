@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   FileText, Bot, ShieldCheck, TrendingUp,
   Activity, ArrowUpRight, Sparkles,
   Database, CheckCircle2, Zap, BarChart3, Users,
   Globe, ArrowRight, RefreshCw, Cpu, Lock,
-  Image as ImageIcon
+  Image as ImageIcon, X, FolderOpen, ExternalLink
 } from 'lucide-react';
 
 /* ─── Animated counter hook ─── */
@@ -101,18 +102,20 @@ const LiveDot = ({ color = '#22c55e' }) => (
 );
 
 /* ─── Hover Photo Card Component ─── */
-function InteractivePhotoCard({ normalImg, hoverImg, title, subtitle, dept, size = 'normal' }) {
+function InteractivePhotoCard({ normalImg, hoverImg, title, subtitle, dept, size = 'normal', onClick }) {
   const [hovered, setHovered] = useState(false);
 
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="relative rounded-2xl overflow-hidden group cursor-pointer transition-all duration-500 hover:-translate-y-1.5 shadow-xl"
+      onClick={onClick}
+      className="relative rounded-2xl overflow-hidden group cursor-pointer transition-all duration-500 hover:-translate-y-1.5 shadow-xl select-none"
       style={{
-        border: '1px solid rgba(217, 180, 130, 0.22)',
+        border: hovered ? '1px solid rgba(217, 180, 130, 0.65)' : '1px solid rgba(217, 180, 130, 0.22)',
         background: 'rgba(20, 22, 30, 0.85)',
         height: size === 'tall' ? '280px' : '180px',
+        boxShadow: hovered ? '0 20px 40px rgba(0,0,0,0.6), 0 0 25px rgba(217, 180, 130, 0.25)' : 'none',
       }}
     >
       {/* Normal Image */}
@@ -163,6 +166,16 @@ function InteractivePhotoCard({ normalImg, hoverImg, title, subtitle, dept, size
         </span>
       </div>
 
+      {/* Click for Info Hint */}
+      <div className="absolute top-3 right-3 z-10">
+        <span
+          className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-black/60 text-[#ffdca8] border border-[#d9b482]/40 transition-opacity"
+          style={{ opacity: hovered ? 1 : 0 }}
+        >
+          Click to View Hub →
+        </span>
+      </div>
+
       {/* Content overlay */}
       <div className="absolute bottom-3 left-3.5 right-3.5 z-10 transition-transform duration-300">
         <h4 className="text-sm font-bold text-[#faf6ef] tracking-tight group-hover:text-[#ffdca8] transition-colors">
@@ -171,11 +184,11 @@ function InteractivePhotoCard({ normalImg, hoverImg, title, subtitle, dept, size
         <p className="text-[11px] text-[#c4b5a3] line-clamp-1 mt-0.5">{subtitle}</p>
 
         <div
-          className="flex items-center gap-1 mt-2 text-[10px] font-semibold text-[#d9b482] overflow-hidden transition-all duration-300"
+          className="flex items-center gap-1.5 mt-2 text-[10px] font-semibold text-[#ffdca8] overflow-hidden transition-all duration-300"
           style={{ maxHeight: hovered ? '20px' : '0px', opacity: hovered ? 1 : 0 }}
         >
-          <span>Open Knowledge Vector</span>
-          <ArrowRight size={11} />
+          <span>Explore Knowledge Vector Hub</span>
+          <ArrowRight size={11} className="text-[#d9b482]" />
         </div>
       </div>
     </div>
@@ -212,33 +225,77 @@ const DEPT_USAGE = [
 // Interactive department photo showcase
 const DEPARTMENT_GALLERY = [
   {
+    id: 'legal',
     title: 'Legal & Risk Compliance',
     subtitle: 'GDPR, SOC-2 Mandates & Contracts',
     dept: 'Legal Core',
+    deptFilter: 'Legal',
     normalImg: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=700&q=80',
     hoverImg: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=700&q=80',
+    overview: 'Cryptographically verified institutional repository holding regulatory compliance guidelines, confidentiality agreements, data processing addendums (DPAs), and SOC-2 Type II audit reports.',
+    stats: { docs: '128 Files', vectors: '2.4M Embeddings', accuracy: '99.9% Grounded', latency: '210ms' },
+    keyDocs: [
+      'Enterprise AI Security & Compliance Policy 2026.pdf',
+      'SOC-2 Type II Audit Report — Tenant Isolation.pdf',
+      'GDPR Data Processing & Privacy Addendum.pdf'
+    ],
+    sampleQuery: 'What are our SOC-2 and AI compliance policies regarding LLM training data?',
+    color: '#f59e0b'
   },
   {
+    id: 'engineering',
     title: 'Cloud Systems Architecture',
     subtitle: 'Kubernetes, microservices & telemetry',
     dept: 'Engineering',
+    deptFilter: 'Engineering',
     normalImg: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=700&q=80',
     hoverImg: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=700&q=80',
+    overview: 'High-density technical repository covering microservices topology, AWS EKS cluster deployment Helm charts, mTLS security protocols, and CI/CD pipelines.',
+    stats: { docs: '342 Files', vectors: '8.1M Embeddings', accuracy: '99.8% Grounded', latency: '190ms' },
+    keyDocs: [
+      'AWS EKS Deployment & Helm Chart Standards.pdf',
+      'Microservices Cloud Architecture & mTLS Tokens.pdf',
+      'Automated CI/CD Pipeline & Test Coverage Mandates.pdf'
+    ],
+    sampleQuery: 'What are the microservices deployment standards for AWS EKS?',
+    color: '#38bdf8'
   },
   {
+    id: 'hr',
     title: 'Workforce Onboarding',
     subtitle: 'Annual benefits, PTO and culture manual',
     dept: 'Human Resources',
+    deptFilter: 'HR',
     normalImg: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=700&q=80',
     hoverImg: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=700&q=80',
+    overview: 'People operations knowledge base containing employee handbooks, PTO guidelines, 401(k) matching policies, annual wellness stipends, and remote workplace guidelines.',
+    stats: { docs: '84 Files', vectors: '1.2M Embeddings', accuracy: '99.9% Grounded', latency: '180ms' },
+    keyDocs: [
+      'Employee Onboarding & Benefits Handbook 2026.pdf',
+      'Annual PTO & Paid Leave Allowance Schedule.pdf',
+      'Health, Vision & Dental Coverage Matrix.pdf'
+    ],
+    sampleQuery: 'What are the annual employee benefits, PTO allowances, and wellness stipends?',
+    color: '#c084fc'
   },
   {
+    id: 'sales',
     title: 'Global Revenue Strategy',
     subtitle: 'Pricing models & enterprise playbook',
     dept: 'Sales & Growth',
+    deptFilter: 'Sales',
     normalImg: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=700&q=80',
     hoverImg: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=700&q=80',
-  },
+    overview: 'Commercial intelligence vector store detailing enterprise SaaS licensing ($45/user/month), volume discount schedules, executive escalation protocols, and sales playbooks.',
+    stats: { docs: '196 Files', vectors: '3.6M Embeddings', accuracy: '99.7% Grounded', latency: '220ms' },
+    keyDocs: [
+      'Q4 Enterprise Sales Playbook & Pricing Tiers.pdf',
+      'Enterprise SaaS Master Service Agreement.pdf',
+      'Multi-Tenant SLA Contract & Dedicated VPC Pricing.pdf'
+    ],
+    sampleQuery: 'What is the enterprise pricing model, discount tiers, and subscription SLA?',
+    color: '#34d399'
+  }
 ];
 
 /* ═════════════════════════════════════════════
@@ -246,11 +303,14 @@ const DEPARTMENT_GALLERY = [
 ═════════════════════════════════════════════ */
 export default function Dashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
+  const navigate = useNavigate();
   const [docCount, setDocCount] = useState(14);
   const [pageLoaded, setPageLoaded] = useState(false);
   const [liveTime, setLiveTime] = useState(new Date());
   const [pingMs, setPingMs] = useState(247);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedHub, setSelectedHub] = useState(null);
 
   /* Count-up animations */
   const animDocs    = useCountUp(docCount, 1600, pageLoaded);
@@ -364,7 +424,7 @@ export default function Dashboard() {
               </div>
 
               <h1 className="text-2xl md:text-3xl font-extrabold text-[#faf6ef] tracking-tight">
-                Good {liveTime.getHours() < 12 ? 'morning' : liveTime.getHours() < 17 ? 'afternoon' : 'evening'},{' '}
+                {liveTime.getHours() < 12 ? t('dash.goodMorning') : liveTime.getHours() < 17 ? t('dash.goodAfternoon') : t('dash.goodEvening')},{' '}
                 <span
                   style={{
                     background: 'linear-gradient(90deg, #f5e4cc, #d9b482, #eedfc8)',
@@ -562,6 +622,7 @@ export default function Dashboard() {
                 dept={card.dept}
                 normalImg={card.normalImg}
                 hoverImg={card.hoverImg}
+                onClick={() => setSelectedHub(card)}
               />
             ))}
           </div>
@@ -824,6 +885,156 @@ export default function Dashboard() {
         </div>
 
       </div>
+
+      {/* ══════════════════════════════════════════
+          KNOWLEDGE VECTOR HUB MODAL
+      ══════════════════════════════════════════ */}
+      {selectedHub && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+          style={{ background: 'rgba(5, 7, 12, 0.88)', backdropFilter: 'blur(20px)' }}
+          onClick={() => setSelectedHub(null)}
+        >
+          <div
+            className="relative w-full max-w-2xl rounded-3xl overflow-hidden border border-amber-500/30 shadow-2xl bg-[#0f121a] my-8 text-left"
+            style={{ boxShadow: '0 30px 90px rgba(0,0,0,0.8), 0 0 50px rgba(217, 180, 130, 0.15)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Photo Header */}
+            <div className="relative h-48 sm:h-52 w-full overflow-hidden">
+              <img
+                src={selectedHub.normalImg}
+                alt={selectedHub.title}
+                className="w-full h-full object-cover"
+                style={{ filter: 'brightness(0.55) saturate(1.1)' }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{ background: 'linear-gradient(to top, #0f121a 0%, rgba(15, 18, 26, 0.4) 60%, transparent 100%)' }}
+              />
+
+              <button
+                type="button"
+                onClick={() => setSelectedHub(null)}
+                className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/60 hover:bg-black/90 text-white/80 hover:text-white transition cursor-pointer border border-white/10"
+              >
+                <X size={16} />
+              </button>
+
+              <div className="absolute bottom-4 left-6 right-6">
+                <span
+                  className="inline-block text-[10px] font-mono font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-2"
+                  style={{ background: 'rgba(217, 180, 130, 0.25)', color: '#ffdca8', border: '1px solid rgba(217, 180, 130, 0.4)' }}
+                >
+                  {selectedHub.dept} · Vector Knowledge Base
+                </span>
+                <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                  {selectedHub.title}
+                </h3>
+                <p className="text-xs text-amber-200/80 mt-0.5">{selectedHub.subtitle}</p>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5 text-xs text-slate-300">
+              <p className="text-slate-300 leading-relaxed text-sm">
+                {selectedHub.overview}
+              </p>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 text-center">
+                  <span className="text-[10px] text-slate-400 block font-mono">Indexed Files</span>
+                  <span className="text-sm font-bold text-white mt-0.5 block">{selectedHub.stats.docs}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 text-center">
+                  <span className="text-[10px] text-slate-400 block font-mono">Vector Chunks</span>
+                  <span className="text-sm font-bold text-cyan-300 mt-0.5 block">{selectedHub.stats.vectors}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 text-center">
+                  <span className="text-[10px] text-slate-400 block font-mono">RAG Precision</span>
+                  <span className="text-sm font-bold text-emerald-400 mt-0.5 block">{selectedHub.stats.accuracy}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 text-center">
+                  <span className="text-[10px] text-slate-400 block font-mono">Query Latency</span>
+                  <span className="text-sm font-bold text-amber-300 mt-0.5 block">{selectedHub.stats.latency}</span>
+                </div>
+              </div>
+
+              {/* Verified Key Documents */}
+              <div>
+                <h4 className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-400 mb-2 flex items-center gap-1.5">
+                  <FileText size={12} />
+                  <span>Grounding Source Documents in this Vector Hub</span>
+                </h4>
+                <div className="space-y-1.5">
+                  {selectedHub.keyDocs.map((doc, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs"
+                    >
+                      <div className="flex items-center gap-2 text-slate-200 font-mono text-[11px]">
+                        <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                        <span className="truncate">{doc}</span>
+                      </div>
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-800/40 shrink-0">
+                        Verified RAG
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sample Grounded Query */}
+              <div className="p-3.5 rounded-2xl bg-amber-950/20 border border-amber-500/20">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 block mb-1">
+                  Sample Grounded Query:
+                </span>
+                <p className="text-xs text-amber-100 font-medium italic">
+                  "{selectedHub.sampleQuery}"
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex flex-wrap items-center justify-end gap-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setSelectedHub(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const dept = selectedHub.deptFilter;
+                    setSelectedHub(null);
+                    navigate(`/documents?dept=${dept}`);
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <FolderOpen size={13} />
+                  <span>Browse {selectedHub.deptFilter} Vault</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const q = selectedHub.sampleQuery;
+                    setSelectedHub(null);
+                    navigate(`/chat?q=${encodeURIComponent(q)}`);
+                  }}
+                  className="px-5 py-2 rounded-xl text-xs font-bold text-[#14110d] transition shadow-lg flex items-center gap-1.5 cursor-pointer hover:scale-105"
+                  style={{ background: 'linear-gradient(135deg, #f5e4cc, #d9b482)' }}
+                >
+                  <Bot size={13} />
+                  <span>Ask Copilot Now</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

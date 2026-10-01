@@ -1,6 +1,8 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSelector from './LanguageSelector';
 import { 
   Bell, 
   Search, 
@@ -15,6 +17,7 @@ import {
 const Navbar = () => {
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const getPageTitle = (pathname) => {
     switch (pathname) {
@@ -43,18 +46,21 @@ const Navbar = () => {
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-3">
+        {/* Language Toggle Dropdown */}
+        <LanguageSelector />
+
         {/* Department Badge */}
         <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/40 border border-[#d9b482]/25 text-xs text-[#eedfc8]">
           <Building2 className="w-3.5 h-3.5 text-[#d9b482]" />
-          <span className="text-[#a3927f]">Dept:</span>
+          <span className="text-[#a3927f]">{t('nav.dept')}:</span>
           <span className="font-semibold text-[#faf6ef]">{user?.department || 'General'}</span>
         </div>
 
         {/* Operational Status */}
         <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/40 border border-emerald-700/40 text-[11px] text-emerald-300">
           <Activity className="w-3.5 h-3.5" />
-          <span className="font-medium">All Systems Operational</span>
+          <span className="font-medium">{t('nav.operational')}</span>
         </div>
 
         {/* User Quick Link */}
