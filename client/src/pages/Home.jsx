@@ -638,9 +638,10 @@ export default function Home() {
             <div className="relative w-full aspect-video bg-black flex items-center justify-center">
               <iframe
                 className="w-full h-full border-0"
-                src="https://www.youtube.com/embed/VYU6N1IxKtk?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1"
-                title="Enterprise AI - Platform Tour & Overview"
+                src="https://www.youtube.com/embed/VYU6N1IxKtk?autoplay=1&mute=1&controls=1&enablejsapi=1&origin=http://localhost:3000"
+                title="Enterprise AI Explained in 2 Minutes"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
                 allowFullScreen
               />
             </div>
