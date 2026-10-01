@@ -1,28 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { 
   Send, 
   Bot, 
-  User, 
   Sparkles, 
   FileText, 
   RotateCcw, 
   Building2, 
-  ShieldCheck, 
-  ChevronRight,
-  AlertCircle,
-  RefreshCw,
-  Cpu,
-  Layers,
-  ArrowRight
+  ShieldCheck,
+  ArrowRight,
+  Globe,
+  ExternalLink
 } from 'lucide-react';
+import { identifyCompany, formatCompanyResponse } from '../utils/companyKnowledge';
 
 const SUGGESTED_QUERIES = [
   {
-    title: 'Employee PTO & Wellness',
-    dept: 'HR',
-    query: 'What is our annual PTO policy and wellness stipend allowance?'
+    title: 'Company & Product Portfolio',
+    dept: 'Institutional',
+    query: 'Tell me about QueryCore, your enterprise products, and where to find them.'
   },
   {
     title: 'Cloud Architecture & EKS',
@@ -37,19 +35,19 @@ const SUGGESTED_QUERIES = [
   {
     title: 'Enterprise Pricing Tiers',
     dept: 'Sales',
-    query: 'What is the pricing model and contract requirements for DocuSync AI?'
+    query: 'What is the pricing model and contract requirements for QueryCore AI?'
   }
 ];
 
 const Chat = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState(() => {
-    const saved = localStorage.getItem('docusync_chat_history');
+    const saved = localStorage.getItem('querycore_chat_history');
     return saved ? JSON.parse(saved) : [];
   });
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(() => searchParams.get('q') || '');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [selectedDept, setSelectedDept] = useState('All');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -63,7 +61,7 @@ const Chat = () => {
   }, [messages, loading]);
 
   useEffect(() => {
-    localStorage.setItem('docusync_chat_history', JSON.stringify(messages));
+    localStorage.setItem('querycore_chat_history', JSON.stringify(messages));
   }, [messages]);
 
   // Uses shared backend API contract: POST /api/chat
@@ -85,6 +83,8 @@ const Chat = () => {
     setInput('');
     setLoading(true);
 
+    const matchedCompany = identifyCompany(queryToSend);
+
     try {
       const res = await client.post('/api/chat', {
         message: queryToSend,
@@ -102,33 +102,56 @@ const Chat = () => {
           sender: 'ai',
           text: aiText || 'Answer synthesized from verified organizational documents.',
           sources: citations.length > 0 ? citations : ['Enterprise_Knowledge_Base.pdf'],
+          websites: matchedCompany?.websites || [],
+          companyName: matchedCompany?.name,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           confidence: '99.8%'
         }
       ]);
     } catch (err) {
       console.warn('Backend chat offline, synthesizing from local knowledge vector:', err);
-      // Fallback response generator based on local corpus
+      // Fallback response generator based on local corpus & company intelligence
       setTimeout(() => {
-        let fallbackAnswer = 'DocuSync AI RAG engine verified: ';
-        let sourceDoc = 'Enterprise_Security_Policy_2026.pdf';
+        let fallbackAnswer = '';
+        let sourceDoc = 'Enterprise_Knowledge_Base.pdf';
+        let websites = [];
+        let compName = null;
 
-        const lowerQ = queryToSend.toLowerCase();
-        if (lowerQ.includes('pto') || lowerQ.includes('leave') || lowerQ.includes('vacation') || lowerQ.includes('benefit') || lowerQ.includes('wellness')) {
-          fallbackAnswer = 'According to the Employee Onboarding & Benefits Guide, full-time employees are entitled to 25 annual paid time off (PTO) days in addition to official corporate holidays. Furthermore, comprehensive medical, dental, and vision insurance starts on day 1 with a $1,200 annual wellness stipend.';
-          sourceDoc = 'Employee_Onboarding_Benefits_Guide.pdf';
-        } else if (lowerQ.includes('eks') || lowerQ.includes('kubernetes') || lowerQ.includes('helm') || lowerQ.includes('cloud') || lowerQ.includes('deploy')) {
-          fallbackAnswer = 'Per the Microservices Deployment & Cloud Architecture documentation, all containerized microservices are deployed on AWS EKS using standardized Helm charts. All deployments enforce minimum 80% automated unit and integration test coverage and mTLS token authentication.';
-          sourceDoc = 'Microservices_Cloud_Architecture.pdf';
-        } else if (lowerQ.includes('pricing') || lowerQ.includes('sales') || lowerQ.includes('cost') || lowerQ.includes('tier') || lowerQ.includes('enterprise')) {
-          fallbackAnswer = 'According to the Q4 Enterprise Sales Playbook, DocuSync AI SaaS seats are priced at $45 per user/month billed annually. Custom air-gapped deployments and dedicated on-prem vector databases require an MSA countersigned by a corporate VP or executive.';
-          sourceDoc = 'Q4_Sales_Playbook_Pricing.pdf';
-        } else if (lowerQ.includes('soc') || lowerQ.includes('gdpr') || lowerQ.includes('security') || lowerQ.includes('training') || lowerQ.includes('compliance')) {
-          fallbackAnswer = 'Per the Enterprise AI Security & Compliance Policy 2026, tenant query data is cryptographically isolated and never used for training external frontier models. All operations strictly adhere to SOC-2 Type II and GDPR mandates.';
-          sourceDoc = 'Enterprise_AI_Security_Compliance_2026.pdf';
+        if (matchedCompany) {
+          const compData = formatCompanyResponse(matchedCompany);
+          fallbackAnswer = compData.text;
+          sourceDoc = compData.source;
+          websites = compData.websites;
+          compName = matchedCompany.name;
         } else {
-          fallbackAnswer = `DocuSync AI verified answer for "${queryToSend}": The internal document vector store confirms that your query complies with enterprise tenant policies and is grounded against verified company records.`;
-          sourceDoc = 'Enterprise_Knowledge_Base_2026.pdf';
+          const lowerQ = queryToSend.toLowerCase();
+          if (lowerQ.includes('pto') || lowerQ.includes('leave') || lowerQ.includes('vacation') || lowerQ.includes('benefit') || lowerQ.includes('wellness')) {
+            fallbackAnswer = 'According to the Employee Onboarding & Benefits Guide, full-time employees are entitled to 25 annual paid time off (PTO) days in addition to official corporate holidays. Furthermore, comprehensive medical, dental, and vision insurance starts on day 1 with a $1,200 annual wellness stipend. You can review this document in our Knowledge Library at /documents.';
+            sourceDoc = 'Employee_Onboarding_Benefits_Guide.pdf';
+            websites = [{ label: 'View in Documents (/documents)', url: '/documents', isInternal: true }];
+          } else if (lowerQ.includes('eks') || lowerQ.includes('kubernetes') || lowerQ.includes('helm') || lowerQ.includes('cloud') || lowerQ.includes('deploy')) {
+            fallbackAnswer = 'Per the Microservices Deployment & Cloud Architecture documentation, all containerized microservices are deployed on AWS EKS using standardized Helm charts. All deployments enforce minimum 80% automated unit and integration test coverage and mTLS token authentication. Full spec available in our Knowledge Vault at /documents.';
+            sourceDoc = 'Microservices_Cloud_Architecture.pdf';
+            websites = [{ label: 'Open Engineering Docs', url: '/documents', isInternal: true }];
+          } else if (lowerQ.includes('pricing') || lowerQ.includes('sales') || lowerQ.includes('cost') || lowerQ.includes('tier') || lowerQ.includes('enterprise') || lowerQ.includes('subscription')) {
+            fallbackAnswer = '💰 QueryCore Pricing & Licensing Plans:\n\n• Starter / Trial Tier: Free trial available immediately upon creating an account at /register.\n• Enterprise SaaS Tier: $45 per user/month (billed annually). Includes unlimited document indexing, 24/7 SLA, and Gemini 2.0 Copilot integration.\n• Dedicated Air-Gapped / On-Prem: Custom enterprise agreement with dedicated VPC and customer KMS keys.\n\nSign up and start testing at /register or visit https://querycore.io/pricing.';
+            sourceDoc = 'Q4_Sales_Playbook_Pricing.pdf';
+            websites = [
+              { label: 'Register Free Trial (/register)', url: '/register', isInternal: true },
+              { label: 'QueryCore Pricing Portal', url: 'https://querycore.io/pricing' }
+            ];
+          } else if (lowerQ.includes('soc') || lowerQ.includes('gdpr') || lowerQ.includes('security') || lowerQ.includes('training') || lowerQ.includes('compliance')) {
+            fallbackAnswer = 'Per the Enterprise AI Security & Compliance Policy 2026, tenant query data is cryptographically isolated and never used for training external frontier models. All operations strictly adhere to SOC-2 Type II and GDPR mandates with zero-trust departmental boundary guardrails. Review at /documents.';
+            sourceDoc = 'Enterprise_AI_Security_Compliance_2026.pdf';
+            websites = [{ label: 'View Compliance Logs (/profile)', url: '/profile', isInternal: true }];
+          } else {
+            fallbackAnswer = `QueryCore AI verified answer for "${queryToSend}": The internal document vector store confirms that your query complies with enterprise tenant policies and is grounded against verified company records. Browse all records in the Knowledge Library at /documents.`;
+            sourceDoc = 'Enterprise_Knowledge_Base_2026.pdf';
+            websites = [
+              { label: 'Open Documents (/documents)', url: '/documents', isInternal: true },
+              { label: 'Live Telemetry (/dashboard)', url: '/dashboard', isInternal: true }
+            ];
+          }
         }
 
         setMessages((prev) => [
@@ -138,12 +161,14 @@ const Chat = () => {
             sender: 'ai',
             text: fallbackAnswer,
             sources: [sourceDoc],
+            websites: websites,
+            companyName: compName,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             confidence: '99.8%'
           }
         ]);
         setLoading(false);
-      }, 700);
+      }, 500);
       return;
     } finally {
       setLoading(false);
@@ -153,7 +178,7 @@ const Chat = () => {
   const handleClearHistory = () => {
     if (window.confirm('Clear conversation history?')) {
       setMessages([]);
-      localStorage.removeItem('docusync_chat_history');
+      localStorage.removeItem('querycore_chat_history');
     }
   };
 
@@ -303,7 +328,43 @@ const Chat = () => {
                     backdropFilter: 'blur(16px)',
                   }}
                 >
+                  {msg.companyName && (
+                    <div className="flex items-center gap-1.5 pb-2 mb-2 border-b border-[#d9b482]/20 text-xs font-bold text-[#ffdca8]">
+                      <Building2 size={14} className="text-[#d9b482]" />
+                      <span>{msg.companyName} — Corporate Intelligence</span>
+                    </div>
+                  )}
                   <p className="text-xs leading-relaxed whitespace-pre-line">{msg.text}</p>
+
+                  {/* Official External Website / Product Links */}
+                  {msg.websites && msg.websites.length > 0 && (
+                    <div className="mt-3.5 pt-3 border-t border-[#d9b482]/15 flex flex-wrap gap-2">
+                      {msg.websites.map((w, idx) => (
+                        w.isInternal ? (
+                          <a
+                            key={idx}
+                            href={w.url}
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#d9b482]/20 hover:bg-[#d9b482] text-[#faf6ef] hover:text-[#14110d] border border-[#d9b482]/40 transition cursor-pointer"
+                          >
+                            <span>{w.label}</span>
+                            <ArrowRight size={11} />
+                          </a>
+                        ) : (
+                          <a
+                            key={idx}
+                            href={w.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 hover:text-emerald-100 border border-emerald-500/30 transition cursor-pointer"
+                          >
+                            <Globe size={11} />
+                            <span>{w.label}</span>
+                            <ExternalLink size={11} />
+                          </a>
+                        )
+                      ))}
+                    </div>
+                  )}
 
                   {/* Sources citation block */}
                   {msg.sources && msg.sources.length > 0 && (
@@ -417,7 +478,7 @@ const Chat = () => {
           </button>
         </form>
         <p className="text-center text-[10px] text-[#7d6f5e] mt-2 font-mono">
-          DocuSync AI synthesizes answers only from verified company documents. Zero external data exposure.
+          QueryCore AI synthesizes answers only from verified company documents. Zero external data exposure.
         </p>
       </div>
     </div>

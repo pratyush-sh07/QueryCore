@@ -102,7 +102,7 @@ const Register = () => {
           Create Enterprise Account
         </h2>
         <p className="mt-1.5 text-center text-xs text-slate-400">
-          Join DocuSync AI for unified institutional intelligence
+          Join QueryCore AI for unified institutional intelligence
         </p>
       </div>
 

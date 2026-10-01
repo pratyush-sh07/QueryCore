@@ -97,7 +97,7 @@ const Profile = () => {
                   {user?.department || 'General'}
                 </span>
               </div>
-              <p className="text-xs text-[#b8a692] mt-0.5">{user?.email || 'enterprise-member@docusync.corp'}</p>
+              <p className="text-xs text-[#b8a692] mt-0.5">{user?.email || 'enterprise-member@querycore.io'}</p>
               <div className="flex items-center gap-2 mt-2 text-[11px] text-[#34d399] font-mono">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 <span>RBAC Authenticated · Session Verified</span>

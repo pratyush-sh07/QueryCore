@@ -5,20 +5,13 @@ import {
   Plus, 
   Search, 
   Trash2, 
-  FileText, 
   Calendar, 
-  Tag, 
-  Filter, 
   X, 
   CheckCircle2, 
   AlertCircle,
   FolderOpen,
-  Building2,
   BookOpen,
-  Sparkles,
-  ArrowRight,
-  Database,
-  ExternalLink
+  Sparkles
 } from 'lucide-react';
 
 const DEPARTMENTS = ['All', 'HR', 'Engineering', 'Sales', 'Legal'];
@@ -53,7 +46,7 @@ const DEFAULT_DOCUMENTS = [
     title: 'Q4 Enterprise Sales Playbook & Pricing Tiers',
     department: 'Sales',
     tags: ['Sales', 'Pricing', 'B2B', 'Contracts'],
-    content: 'DocuSync AI enterprise tier is priced at $45 per user/month billed annually. Custom deployment and on-prem vector databases require an enterprise agreement signed by a VP or C-level executive.',
+    content: 'QueryCore AI enterprise tier is priced at $45 per user/month billed annually. Custom deployment and on-prem vector databases require an enterprise agreement signed by a VP or C-level executive.',
     createdAt: '2026-09-30T16:45:00Z',
   }
 ];
@@ -88,7 +81,7 @@ const Documents = () => {
         const docs = Array.isArray(res.data) ? res.data : (res.data?.documents || []);
         if (docs.length > 0) {
           setDocuments(docs);
-          localStorage.setItem('docusync_documents', JSON.stringify(docs));
+          localStorage.setItem('querycore_documents', JSON.stringify(docs));
         } else {
           loadSavedOrDefaults();
         }
@@ -101,12 +94,12 @@ const Documents = () => {
     };
 
     const loadSavedOrDefaults = () => {
-      const saved = localStorage.getItem('docusync_documents');
+      const saved = localStorage.getItem('querycore_documents');
       if (saved) {
         setDocuments(JSON.parse(saved));
       } else {
         setDocuments(DEFAULT_DOCUMENTS);
-        localStorage.setItem('docusync_documents', JSON.stringify(DEFAULT_DOCUMENTS));
+        localStorage.setItem('querycore_documents', JSON.stringify(DEFAULT_DOCUMENTS));
       }
     };
 
@@ -136,14 +129,14 @@ const Documents = () => {
       const savedDoc = res.data?.document || newDoc;
       const updated = [savedDoc, ...documents];
       setDocuments(updated);
-      localStorage.setItem('docusync_documents', JSON.stringify(updated));
+      localStorage.setItem('querycore_documents', JSON.stringify(updated));
       showToast('Document successfully indexed in vector store!', 'success');
       resetModal();
     } catch (err) {
       console.warn('Backend POST fallback to local store:', err);
       const updated = [newDoc, ...documents];
       setDocuments(updated);
-      localStorage.setItem('docusync_documents', JSON.stringify(updated));
+      localStorage.setItem('querycore_documents', JSON.stringify(updated));
       showToast('Document stored locally in offline mode', 'success');
       resetModal();
     } finally {
@@ -167,13 +160,13 @@ const Documents = () => {
       await client.delete(`/api/documents/${id}`);
       const updated = documents.filter((d) => d.id !== id);
       setDocuments(updated);
-      localStorage.setItem('docusync_documents', JSON.stringify(updated));
+      localStorage.setItem('querycore_documents', JSON.stringify(updated));
       showToast(`Document "${title}" removed`, 'success');
     } catch (err) {
       console.warn('Backend DELETE fallback to local sync:', err);
       const updated = documents.filter((d) => d.id !== id);
       setDocuments(updated);
-      localStorage.setItem('docusync_documents', JSON.stringify(updated));
+      localStorage.setItem('querycore_documents', JSON.stringify(updated));
       showToast(`Document "${title}" deleted locally`, 'success');
     }
   };

@@ -7,11 +7,7 @@ import {
   Bot, 
   User, 
   Sparkles, 
-  LogOut, 
-  Server,
-  Activity,
-  Layers,
-  ChevronRight
+  LogOut 
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -55,7 +51,7 @@ const Sidebar = () => {
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-[#faf6ef] text-base tracking-tight">DocuSync</span>
+              <span className="font-bold text-[#faf6ef] text-base tracking-tight">QueryCore</span>
               <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-[#d9b482] border border-amber-500/30">
                 AI
               </span>

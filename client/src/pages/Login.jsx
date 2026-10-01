@@ -4,8 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import client from '../api/client';
 import {
   Sparkles, Lock, Mail, ArrowRight, AlertCircle,
-  ShieldCheck, Zap, Building2, Bot, ArrowLeft,
-  FileText, Database, CheckCircle2, Star
+  ShieldCheck, ArrowLeft
 } from 'lucide-react';
 import FloatingChatWidget from '../components/FloatingChatWidget';
 import CosmicCanvas from '../components/CosmicCanvas';
@@ -111,7 +110,7 @@ export default function Login() {
 
   const handleDemo = (dept) => {
     const tok = 'demo-' + Date.now();
-    const u   = { email: `${dept.toLowerCase()}@docusync.corp`, fullName: `Enterprise ${dept} Lead`, department: dept };
+    const u   = { email: `${dept.toLowerCase()}@querycore.io`, fullName: `Enterprise ${dept} Lead`, department: dept };
     localStorage.setItem('token', tok);
     localStorage.setItem('user', JSON.stringify(u));
     if (setToken) setToken(tok);
@@ -231,7 +230,7 @@ export default function Login() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-white text-2xl tracking-tight">DocuSync AI</span>
+              <span className="font-extrabold text-white text-2xl tracking-tight">QueryCore AI</span>
               <span
                 className="text-[9px] font-mono px-2 py-0.5 rounded uppercase font-semibold"
                 style={{
@@ -373,7 +372,7 @@ export default function Login() {
             </div>
 
             <p className="text-center text-xs text-[#a3927f] mt-5">
-              New to DocuSync?{' '}
+              New to QueryCore?{' '}
               <Link to="/register" className="text-[#e6c89c] hover:text-[#fff0dc] font-semibold transition-colors">
                 Create account
               </Link>
