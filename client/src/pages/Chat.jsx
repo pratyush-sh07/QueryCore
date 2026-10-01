@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -8,14 +9,15 @@ import {
   FileText, 
   RotateCcw, 
   Building2, 
-  ShieldCheck 
+  ShieldCheck,
+  ArrowRight
 } from 'lucide-react';
 
 const SUGGESTED_QUERIES = [
   {
-    title: 'Employee PTO & Wellness',
-    dept: 'HR',
-    query: 'What is our annual PTO policy and wellness stipend allowance?'
+    title: 'Company & Product Portfolio',
+    dept: 'Institutional',
+    query: 'Tell me about QueryCore, your enterprise products, and where to find them.'
   },
   {
     title: 'Cloud Architecture & EKS',
@@ -36,11 +38,12 @@ const SUGGESTED_QUERIES = [
 
 const Chat = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem('querycore_chat_history');
     return saved ? JSON.parse(saved) : [];
   });
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(() => searchParams.get('q') || '');
   const [loading, setLoading] = useState(false);
   const [selectedDept, setSelectedDept] = useState('All');
   const messagesEndRef = useRef(null);
@@ -106,20 +109,29 @@ const Chat = () => {
         let sourceDoc = 'Enterprise_Security_Policy_2026.pdf';
 
         const lowerQ = queryToSend.toLowerCase();
-        if (lowerQ.includes('pto') || lowerQ.includes('leave') || lowerQ.includes('vacation') || lowerQ.includes('benefit') || lowerQ.includes('wellness')) {
-          fallbackAnswer = 'According to the Employee Onboarding & Benefits Guide, full-time employees are entitled to 25 annual paid time off (PTO) days in addition to official corporate holidays. Furthermore, comprehensive medical, dental, and vision insurance starts on day 1 with a $1,200 annual wellness stipend.';
+        if (lowerQ.includes('about') || lowerQ.includes('company') || lowerQ.includes('who are you') || lowerQ.includes('querycore') || lowerQ.includes('mission')) {
+          fallbackAnswer = '🏢 About QueryCore Technologies Inc.:\n\nQueryCore is an enterprise AI knowledge intelligence and retrieval-augmented generation (RAG) platform founded to eliminate corporate information silos. We unify fragmented documentation across engineering, legal, HR, and sales into a single cryptographically isolated copilot with 100% mathematical source citation integrity.\n\n• Headquarters: Silicon Valley, CA with distributed hybrid infrastructure across AWS and GCP.\n• Security: SOC-2 Type II Certified, GDPR Compliant, and HIPAA-ready. Customer documents NEVER train external frontier models.\n• Core Products: QueryCore AI Copilot (/chat), Knowledge Library (/documents), Executive Analytics (/dashboard), and Compliance Shield (/profile).\n• Official Portal: https://querycore.io | Web App: /chat and /documents.';
+          sourceDoc = 'QueryCore_Company_Overview_2026.pdf';
+        } else if (lowerQ.includes('product') || lowerQ.includes('offer') || lowerQ.includes('catalog') || lowerQ.includes('list product')) {
+          fallbackAnswer = '📦 QueryCore Enterprise Product Portfolio & Where to Find Them:\n\n1. QueryCore Grounded AI Copilot (Gemini 2.0): Real-time natural language Q&A with mathematical cosine RAG alignment and clickable citations. (Found at: /chat | https://querycore.io/chat)\n\n2. QueryCore Knowledge Library (Vector Vault): 10M+ indexed pages across PDF, DOCX, Markdown, Notion, Confluence with GIN full-text search. (Found at: /documents | https://querycore.io/documents)\n\n3. QueryCore Executive Analytics Suite: Real-time 240ms telemetry, document velocity heatmaps, and audit anomaly detection. (Found at: /dashboard | https://querycore.io/dashboard)\n\n4. QueryCore Compliance Shield & Guardrails: Zero-trust departmental boundary guardrails and immutable PostgreSQL audit logging. (Found at: /profile | https://querycore.io/security)\n\n5. QueryCore Air-Gapped Private Vault: Dedicated on-premise or AWS GovCloud deployment with customer-managed KMS encryption keys. (Found at: /register | https://querycore.io/enterprise-vault)';
+          sourceDoc = 'QueryCore_Product_Catalog_2026.pdf';
+        } else if (lowerQ.includes('where') || lowerQ.includes('site') || lowerQ.includes('website') || lowerQ.includes('url') || lowerQ.includes('find') || lowerQ.includes('buy') || lowerQ.includes('access')) {
+          fallbackAnswer = '📍 Where to Find & Access QueryCore Products:\n\n• AI Copilot (Interactive Assistant): In-app at /chat (or https://querycore.io/chat)\n• Knowledge Library (Document Vault): In-app at /documents (or https://querycore.io/documents)\n• Executive Analytics (Telemetry): In-app at /dashboard (or https://querycore.io/dashboard)\n• Account & Security Settings: In-app at /profile (or https://querycore.io/security)\n• Free Trial & Account Registration: In-app at /register (or https://querycore.io/register)\n• API Documentation & Swagger UI: Live at http://localhost:8000/api/docs\n\nFor enterprise contracts ($45/user/month), email sales@querycore.io!';
+          sourceDoc = 'QueryCore_Platform_Directory.pdf';
+        } else if (lowerQ.includes('pto') || lowerQ.includes('leave') || lowerQ.includes('vacation') || lowerQ.includes('benefit') || lowerQ.includes('wellness')) {
+          fallbackAnswer = 'According to the Employee Onboarding & Benefits Guide, full-time employees are entitled to 25 annual paid time off (PTO) days in addition to official corporate holidays. Furthermore, comprehensive medical, dental, and vision insurance starts on day 1 with a $1,200 annual wellness stipend. You can review this document in our Knowledge Library at /documents.';
           sourceDoc = 'Employee_Onboarding_Benefits_Guide.pdf';
         } else if (lowerQ.includes('eks') || lowerQ.includes('kubernetes') || lowerQ.includes('helm') || lowerQ.includes('cloud') || lowerQ.includes('deploy')) {
-          fallbackAnswer = 'Per the Microservices Deployment & Cloud Architecture documentation, all containerized microservices are deployed on AWS EKS using standardized Helm charts. All deployments enforce minimum 80% automated unit and integration test coverage and mTLS token authentication.';
+          fallbackAnswer = 'Per the Microservices Deployment & Cloud Architecture documentation, all containerized microservices are deployed on AWS EKS using standardized Helm charts. All deployments enforce minimum 80% automated unit and integration test coverage and mTLS token authentication. Full spec available in our Knowledge Vault at /documents.';
           sourceDoc = 'Microservices_Cloud_Architecture.pdf';
-        } else if (lowerQ.includes('pricing') || lowerQ.includes('sales') || lowerQ.includes('cost') || lowerQ.includes('tier') || lowerQ.includes('enterprise')) {
-          fallbackAnswer = 'According to the Q4 Enterprise Sales Playbook, QueryCore AI SaaS seats are priced at $45 per user/month billed annually. Custom air-gapped deployments and dedicated on-prem vector databases require an MSA countersigned by a corporate VP or executive.';
+        } else if (lowerQ.includes('pricing') || lowerQ.includes('sales') || lowerQ.includes('cost') || lowerQ.includes('tier') || lowerQ.includes('enterprise') || lowerQ.includes('subscription')) {
+          fallbackAnswer = '💰 QueryCore Pricing & Licensing Plans:\n\n• Starter / Trial Tier: Free trial available immediately upon creating an account at /register.\n• Enterprise SaaS Tier: $45 per user/month (billed annually). Includes unlimited document indexing, 24/7 SLA, and Gemini 2.0 Copilot integration.\n• Dedicated Air-Gapped / On-Prem: Custom enterprise agreement with dedicated VPC and customer KMS keys.\n\nSign up and start testing at /register or visit https://querycore.io/pricing.';
           sourceDoc = 'Q4_Sales_Playbook_Pricing.pdf';
         } else if (lowerQ.includes('soc') || lowerQ.includes('gdpr') || lowerQ.includes('security') || lowerQ.includes('training') || lowerQ.includes('compliance')) {
-          fallbackAnswer = 'Per the Enterprise AI Security & Compliance Policy 2026, tenant query data is cryptographically isolated and never used for training external frontier models. All operations strictly adhere to SOC-2 Type II and GDPR mandates.';
+          fallbackAnswer = 'Per the Enterprise AI Security & Compliance Policy 2026, tenant query data is cryptographically isolated and never used for training external frontier models. All operations strictly adhere to SOC-2 Type II and GDPR mandates with zero-trust departmental boundary guardrails. Review at /documents.';
           sourceDoc = 'Enterprise_AI_Security_Compliance_2026.pdf';
         } else {
-          fallbackAnswer = `QueryCore AI verified answer for "${queryToSend}": The internal document vector store confirms that your query complies with enterprise tenant policies and is grounded against verified company records.`;
+          fallbackAnswer = `QueryCore AI verified answer for "${queryToSend}": The internal document vector store confirms that your query complies with enterprise tenant policies and is grounded against verified company records. Browse all records in the Knowledge Library at /documents.`;
           sourceDoc = 'Enterprise_Knowledge_Base_2026.pdf';
         }
 
