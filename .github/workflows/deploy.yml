@@ -1,0 +1,93 @@
+name: QueryCore Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_SERVER: ghcr.io/${{ github.repository }}/server
+  IMAGE_CLIENT: ghcr.io/${{ github.repository }}/client
+
+jobs:
+  build-and-push-containers:
+    name: Build & Publish Container Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Metadata (Tags, Labels) for Server
+        id: meta-server
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_SERVER }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short
+
+      - name: Build & Push Server Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          push: true
+          tags: ${{ steps.meta-server.outputs.tags }}
+          labels: ${{ steps.meta-server.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract Metadata (Tags, Labels) for Client
+        id: meta-client
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_CLIENT }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short
+
+      - name: Build & Push Client Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          file: ./client/Dockerfile
+          push: true
+          tags: ${{ steps.meta-client.outputs.tags }}
+          labels: ${{ steps.meta-client.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-verification:
+    name: Deployment Verification & Smoke Test
+    runs-on: ubuntu-latest
+    needs: build-and-push-containers
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Smoke Test Compose Orchestration
+        run: |
+          docker compose up -d
+          echo "Waiting for services to become healthy..."
+          sleep 15
+          docker compose ps
+          docker compose down
