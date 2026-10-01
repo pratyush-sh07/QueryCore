@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   Send, 
   Bot, 
@@ -41,6 +42,7 @@ const SUGGESTED_QUERIES = [
 
 const Chat = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem('querycore_chat_history');

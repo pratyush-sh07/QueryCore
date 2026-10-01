@@ -48,6 +48,36 @@ const STOCKS = [
 ];
 
 /* ─────────────────────────────────────────
+   ENTERPRISE AI VIDEO TUTORIALS
+───────────────────────────────────────── */
+const ENTERPRISE_VIDEOS = [
+  {
+    id: 's5R83713u-0',
+    title: 'What is Retrieval-Augmented Generation (RAG)?',
+    channel: 'IBM Technology',
+    badge: 'Core Architecture',
+    duration: '6:35',
+    summary: 'Discover how Enterprise RAG connects large language models to your company private document repositories for grounded, hallucination-free intelligence.'
+  },
+  {
+    id: 'PwU0XQiXhjk',
+    title: 'Enterprise AI Explained: Scalable, Secure & Responsible AI',
+    channel: 'Executive Briefing',
+    badge: 'Security & Scale',
+    duration: '2:15',
+    summary: 'Learn the foundational pillars that separate consumer AI chatbots from enterprise-ready AI: governance, compliance, RBAC, and data privacy.'
+  },
+  {
+    id: 'b4wS4h_a5pY',
+    title: 'Generative AI & Foundation Models Demystified',
+    channel: 'IBM Technology',
+    badge: 'Foundations',
+    duration: '11:20',
+    summary: 'An executive breakdown of how generative AI and neural embeddings transform enterprise knowledge retrieval and automated synthesis.'
+  }
+];
+
+/* ─────────────────────────────────────────
    COMPANY STATS
 ───────────────────────────────────────── */
 const COMPANIES = [
@@ -444,6 +474,7 @@ export default function Home() {
   const [mousePos, setMousePos] = useState({ x: 760, y: 400 });
   const [heroImg, setHeroImg]   = useState(0);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [activeVideoId, setActiveVideoId] = useState('s5R83713u-0');
   const [selectedDomain, setSelectedDomain] = useState(null);
 
   useEffect(() => {
@@ -475,6 +506,7 @@ export default function Home() {
           <div className="hidden md:flex items-center gap-7 text-xs font-medium text-[#b8a692]">
             <a href="#features" className="hover:text-[#faf6ef] transition-colors">{t('nav.platform')}</a>
             <a href="#products" className="hover:text-[#faf6ef] transition-colors">{t('nav.products')}</a>
+            <a href="#video"    className="hover:text-[#faf6ef] transition-colors">{t('nav.video')}</a>
             <a href="#demo"     className="hover:text-[#faf6ef] transition-colors">{t('nav.liveDemo')}</a>
             <a href="#stats"    className="hover:text-[#faf6ef] transition-colors">{t('nav.enterprise')}</a>
           </div>
@@ -823,6 +855,96 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════════
+          ENTERPRISE AI VIDEO MASTERCLASS SECTION
+      ══════════════════════════════════════════ */}
+      <section id="video" className="py-24 px-4 sm:px-6 relative overflow-hidden bg-[#0c0f16]">
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3 text-xs font-semibold text-[#f5e4cc]"
+              style={{ background:'rgba(217,180,130,0.15)', border:'1px solid rgba(217,180,130,0.3)' }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#d9b482] animate-pulse"/>
+              {t('video.badge')}
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              {t('video.title')}
+            </h2>
+            <p className="text-sm text-slate-400 mt-2 max-w-2xl mx-auto">
+              {t('video.subtitle')}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+            {/* Main Video Player Container (2 Cols) */}
+            <div className="lg:col-span-2 rounded-3xl overflow-hidden border border-amber-500/25 bg-black/60 shadow-2xl flex flex-col justify-between"
+              style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.8), 0 0 30px rgba(217,180,130,0.15)' }}>
+              <div className="relative w-full aspect-video bg-black">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${activeVideoId}?rel=0&modestbranding=1`}
+                  title="Enterprise AI Explained"
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              <div className="p-5 bg-[#121520] border-t border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <span className="text-[10px] font-mono text-cyan-300 uppercase tracking-wider font-semibold">
+                    NOW PLAYING
+                  </span>
+                  <h4 className="text-sm font-bold text-white mt-0.5">
+                    {ENTERPRISE_VIDEOS.find(v => v.id === activeVideoId)?.title}
+                  </h4>
+                  <p className="text-xs text-slate-400 mt-1">
+                    {ENTERPRISE_VIDEOS.find(v => v.id === activeVideoId)?.summary}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setVideoOpen(true)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#14110d] bg-gradient-to-r from-[#d9b482] to-[#c4975f] hover:scale-105 transition shadow-lg shrink-0 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Play size={13} fill="currentColor"/>
+                  <span>Open Fullscreen</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Video Playlist Selector (1 Col) */}
+            <div className="flex flex-col gap-3">
+              <span className="text-xs font-mono uppercase tracking-wider text-amber-300 font-bold px-1">
+                {t('video.selectTopic')}
+              </span>
+              {ENTERPRISE_VIDEOS.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => setActiveVideoId(v.id)}
+                  className={`p-4 rounded-2xl text-left transition-all cursor-pointer flex-1 flex flex-col justify-between ${
+                    activeVideoId === v.id
+                      ? 'bg-amber-500/15 border border-amber-500/50 text-white shadow-xl scale-[1.02]'
+                      : 'bg-[#141722]/80 border border-white/5 text-slate-300 hover:bg-white/5 hover:border-white/10'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-semibold">
+                        {v.badge}
+                      </span>
+                      <span className="text-xs font-mono text-slate-400">{v.duration}</span>
+                    </div>
+                    <h4 className="text-sm font-bold leading-snug">{v.title}</h4>
+                    <p className="text-xs text-slate-400 mt-1.5 line-clamp-2">{v.summary}</p>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-amber-400">
+                    <span>{v.channel}</span>
+                    <span className="flex items-center gap-1">Play Video →</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════
           FINAL CTA SECTION — photo background
       ══════════════════════════════════════════ */}
       <section className="relative py-32 px-4 sm:px-6 overflow-hidden">
@@ -861,25 +983,85 @@ export default function Home() {
 
       {/* Video modal */}
       {videoOpen && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center"
-          style={{ background:'rgba(0,0,0,0.9)', backdropFilter:'blur(8px)' }}
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6"
+          style={{ background:'rgba(5, 7, 12, 0.94)', backdropFilter:'blur(16px)' }}
           onClick={() => setVideoOpen(false)}>
-          <div className="relative rounded-2xl overflow-hidden w-full max-w-3xl mx-4"
-            style={{ border:'1px solid rgba(255,255,255,0.1)' }}
+          <div className="relative rounded-3xl overflow-hidden w-full max-w-4xl bg-[#0f121a] border border-amber-500/40 shadow-2xl flex flex-col"
+            style={{ boxShadow:'0 30px 90px rgba(0,0,0,0.9), 0 0 50px rgba(217, 180, 130, 0.25)' }}
             onClick={e => e.stopPropagation()}>
-            <button onClick={() => setVideoOpen(false)}
-              className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/90 transition">
-              <X size={16}/>
-            </button>
-            <img src="https://images.unsplash.com/photo-1453728013993-6d66e9c9123a?auto=format&fit=crop&w=1200&q=80"
-              alt="Demo" className="w-full object-cover" style={{ height:'420px' }}/>
-            <div className="absolute inset-0 flex items-center justify-center flex-col gap-3">
-              <div className="w-18 h-18 w-16 h-16 rounded-full flex items-center justify-center"
-                style={{ background:'rgba(37,99,235,0.85)', backdropFilter:'blur(10px)' }}>
-                <Play size={26} className="text-white ml-1"/>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 bg-[#141824] border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-gradient-to-r from-amber-500 to-amber-700 text-black font-bold">
+                  <Play size={16} className="text-black ml-0.5" fill="currentColor"/>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <span>Enterprise AI & RAG Masterclass</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-semibold">
+                      HD Player
+                    </span>
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Watch how QueryCore grounds enterprise knowledge without hallucinations
+                  </p>
+                </div>
               </div>
-              <p className="text-sm font-semibold text-white">QueryCore AI — Platform Tour</p>
-              <p className="text-xs text-slate-300">Backend integration in progress — Demo coming soon</p>
+              <button onClick={() => setVideoOpen(false)}
+                className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition border border-white/20 cursor-pointer">
+                <X size={16}/>
+              </button>
+            </div>
+
+            {/* Video Player */}
+            <div className="relative w-full aspect-video bg-black">
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${activeVideoId}?autoplay=1&rel=0&modestbranding=1`}
+                title="Enterprise AI Explained"
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+
+            {/* Playlist switcher inside modal */}
+            <div className="p-4 bg-[#0a0c12] border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {ENTERPRISE_VIDEOS.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => setActiveVideoId(v.id)}
+                  className={`p-2.5 rounded-xl text-left transition-all cursor-pointer ${
+                    activeVideoId === v.id
+                      ? 'bg-amber-500/15 border border-amber-500/50 text-white shadow-md'
+                      : 'bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[9px] font-mono uppercase text-cyan-300 font-semibold">{v.badge}</span>
+                    <span className="text-[9px] font-mono text-slate-400">{v.duration}</span>
+                  </div>
+                  <p className="text-xs font-semibold line-clamp-1">{v.title}</p>
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">{v.channel}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Modal footer */}
+            <div className="px-6 py-3.5 bg-[#141824] border-t border-white/10 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400 font-mono">
+                QueryCore AI · Gemini 2.0 RAG Engine · Grounded Knowledge
+              </span>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setVideoOpen(false)}
+                  className="px-4 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition cursor-pointer">
+                  Close
+                </button>
+                <Link to="/chat" onClick={() => setVideoOpen(false)}
+                  className="px-4 py-1.5 rounded-xl text-xs font-bold text-[#14110d] bg-gradient-to-r from-[#e6c89c] to-[#d9b482] hover:opacity-95 transition shadow-lg flex items-center gap-1.5 cursor-pointer">
+                  <Bot size={13}/>
+                  <span>Test in Copilot</span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

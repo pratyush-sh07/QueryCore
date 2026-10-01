@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   Bot, 
   X, 
@@ -28,6 +29,7 @@ const INSTITUTION_FAQS = [
 
 const FloatingChatWidget = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([
@@ -339,7 +341,7 @@ const FloatingChatWidget = () => {
                 {loading && (
                   <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-900/60 border border-slate-800 text-[11px] text-blue-400">
                     <Sparkles className="w-3 h-3 animate-spin" />
-                    <span>Analyzing institutional knowledge...</span>
+                    <span>{t('widget.analyzing')}</span>
                   </div>
                 )}
 
@@ -371,7 +373,7 @@ const FloatingChatWidget = () => {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask institutional question..."
+                  placeholder={t('widget.inputPlaceholder')}
                   className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
                 <button

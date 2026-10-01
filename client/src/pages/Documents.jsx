@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   Plus, 
   Search, 
@@ -54,6 +55,7 @@ const DEFAULT_DOCUMENTS = [
 
 const Documents = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -244,10 +246,10 @@ const Documents = () => {
           <div>
             <h1 className="text-xl font-bold text-[#faf6ef] tracking-tight flex items-center gap-2.5">
               <BookOpen className="w-5 h-5 text-[#d9b482]" />
-              <span>Organizational Knowledge Base</span>
+              <span>{t('docs.title')}</span>
             </h1>
             <p className="text-xs text-[#b8a692] mt-1">
-              Browse, search, and ingest company documents for grounded AI Copilot retrieval
+              {t('docs.subtitle')}
             </p>
           </div>
           <button

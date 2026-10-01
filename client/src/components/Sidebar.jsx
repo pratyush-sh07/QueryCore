@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -12,6 +13,7 @@ import {
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -20,10 +22,10 @@ const Sidebar = () => {
   };
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, badge: null },
-    { name: 'Knowledge Base', path: '/documents', icon: FileText, badge: null },
-    { name: 'AI Copilot', path: '/chat', icon: Bot, badge: 'Live' },
-    { name: 'Profile & Security', path: '/profile', icon: User, badge: null },
+    { name: t('nav.dashboard'), path: '/dashboard', icon: LayoutDashboard, badge: null },
+    { name: t('nav.knowledge'), path: '/documents', icon: FileText, badge: null },
+    { name: t('nav.copilot'), path: '/chat', icon: Bot, badge: 'Live' },
+    { name: t('nav.profile'), path: '/profile', icon: User, badge: null },
   ];
 
   const getDeptColor = (dept) => {
@@ -62,7 +64,7 @@ const Sidebar = () => {
         {/* Navigation Section */}
         <div className="p-3">
           <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Workspace Hub
+            {t('nav.workspaceHub')}
           </div>
 
           <nav className="space-y-1 mt-1">
@@ -130,7 +132,7 @@ const Sidebar = () => {
           </div>
           <button
             onClick={handleLogout}
-            title="Sign out"
+            title={t('nav.logout')}
             className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-800/80 transition cursor-pointer"
           >
             <LogOut className="w-4 h-4" />

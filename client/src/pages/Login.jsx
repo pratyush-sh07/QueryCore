@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSelector from '../components/LanguageSelector';
 import client from '../api/client';
 import {
   Sparkles, Lock, Mail, ArrowRight, AlertCircle,
@@ -53,6 +55,7 @@ const FLOATING_PREVIEWS = [
 ];
 
 export default function Login() {
+  const { t } = useLanguage();
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
@@ -168,8 +171,13 @@ export default function Login() {
           }}
         >
           <ArrowLeft size={14} className="text-[#d9b482]" />
-          <span>Back to Home</span>
+          <span>{t('auth.backHome')}</span>
         </Link>
+      </div>
+
+      {/* ── Fixed Language Selector ── */}
+      <div className="fixed top-6 right-6 z-50">
+        <LanguageSelector />
       </div>
 
       {/* ── Interactive floating photo cards that swap images on hover ── */}

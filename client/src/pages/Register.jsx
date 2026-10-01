@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSelector from '../components/LanguageSelector';
 import client from '../api/client';
 import { 
   Sparkles, 
@@ -18,6 +20,7 @@ import FloatingChatWidget from '../components/FloatingChatWidget';
 const DEPARTMENTS = ['Engineering', 'HR', 'Sales', 'Legal'];
 
 const Register = () => {
+  const { t } = useLanguage();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -88,8 +91,13 @@ const Register = () => {
           className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white px-3 py-2 rounded-xl glass-panel border border-white/5 hover:border-slate-700 transition"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to Home</span>
+          <span>{t('auth.backHome')}</span>
         </Link>
+      </div>
+
+      {/* Language Selector */}
+      <div className="absolute top-6 right-6 z-20">
+        <LanguageSelector />
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   FileText, Bot, ShieldCheck, TrendingUp,
   Activity, ArrowUpRight, Sparkles,
@@ -302,6 +303,7 @@ const DEPARTMENT_GALLERY = [
 ═════════════════════════════════════════════ */
 export default function Dashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [docCount, setDocCount] = useState(14);
   const [pageLoaded, setPageLoaded] = useState(false);
@@ -422,7 +424,7 @@ export default function Dashboard() {
               </div>
 
               <h1 className="text-2xl md:text-3xl font-extrabold text-[#faf6ef] tracking-tight">
-                Good {liveTime.getHours() < 12 ? 'morning' : liveTime.getHours() < 17 ? 'afternoon' : 'evening'},{' '}
+                {liveTime.getHours() < 12 ? t('dash.goodMorning') : liveTime.getHours() < 17 ? t('dash.goodAfternoon') : t('dash.goodEvening')},{' '}
                 <span
                   style={{
                     background: 'linear-gradient(90deg, #f5e4cc, #d9b482, #eedfc8)',
