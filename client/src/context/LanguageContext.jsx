@@ -850,10 +850,11 @@ export function LanguageProvider({ children }) {
     return fallback || key;
   };
 
-  const currentLangObj = LANGUAGES.find((l) => l.code === currentLang) || LANGUAGES[0];
+  const selectedLanguage = LANGUAGES.find((l) => l.code === currentLang) || LANGUAGES[0];
+  const currentLangObj = selectedLanguage;
 
   return (
-    <LanguageContext.Provider value={{ currentLang, setLanguage, t, languages: LANGUAGES, currentLangObj }}>
+    <LanguageContext.Provider value={{ currentLang, setLanguage, t, languages: LANGUAGES, currentLangObj, selectedLanguage }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -867,7 +868,8 @@ export function useLanguage() {
       setLanguage: () => {},
       t: (key, fallback) => fallback || key,
       languages: LANGUAGES,
-      currentLangObj: LANGUAGES[0]
+      currentLangObj: LANGUAGES[0],
+      selectedLanguage: LANGUAGES[0]
     };
   }
   return context;

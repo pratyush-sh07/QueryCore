@@ -3,7 +3,8 @@ import { Globe, Check, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function LanguageSelector({ compact = false, className = '' }) {
-  const { currentLang, setLanguage, languages, selectedLanguage } = useLanguage();
+  const { currentLang = 'en', setLanguage = () => {}, languages = [], selectedLanguage, currentLangObj } = useLanguage();
+  const activeLang = selectedLanguage || currentLangObj || (languages && languages.find((l) => l.code === currentLang)) || { code: 'en', name: 'English', native: 'English', flag: '🇺🇸' };
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -32,8 +33,8 @@ export default function LanguageSelector({ compact = false, className = '' }) {
         aria-label="Change Language"
       >
         <Globe size={compact ? 12 : 13} className="text-[#d9b482]" />
-        <span className="text-sm leading-none">{selectedLanguage.flag}</span>
-        <span className="font-semibold uppercase tracking-wider">{selectedLanguage.code}</span>
+        <span className="text-sm leading-none">{activeLang?.flag || '🇺🇸'}</span>
+        <span className="font-semibold uppercase tracking-wider">{activeLang?.code || 'EN'}</span>
         <ChevronDown
           size={11}
           className={`text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
