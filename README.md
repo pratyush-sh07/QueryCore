@@ -189,3 +189,7 @@ The database auto-seeds with these test accounts:
 | `engineer@querycore.io` | `Password123!` | `member` | Engineering |
 | `hr@querycore.io` | `Password123!` | `member` | HR |
 | `legal@querycore.io` | `Password123!` | `member` | Legal |
+
+If you want to login 
+Registered Mail - new@gmail.com
+Password - 123456
