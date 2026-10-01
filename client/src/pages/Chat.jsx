@@ -10,8 +10,11 @@ import {
   RotateCcw, 
   Building2, 
   ShieldCheck,
-  ArrowRight
+  ArrowRight,
+  Globe,
+  ExternalLink
 } from 'lucide-react';
+import { identifyCompany, formatCompanyResponse } from '../utils/companyKnowledge';
 
 const SUGGESTED_QUERIES = [
   {
@@ -80,6 +83,8 @@ const Chat = () => {
     setInput('');
     setLoading(true);
 
+    const matchedCompany = identifyCompany(queryToSend);
+
     try {
       const res = await client.post('/api/chat', {
         message: queryToSend,
@@ -97,42 +102,56 @@ const Chat = () => {
           sender: 'ai',
           text: aiText || 'Answer synthesized from verified organizational documents.',
           sources: citations.length > 0 ? citations : ['Enterprise_Knowledge_Base.pdf'],
+          websites: matchedCompany?.websites || [],
+          companyName: matchedCompany?.name,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           confidence: '99.8%'
         }
       ]);
     } catch (err) {
       console.warn('Backend chat offline, synthesizing from local knowledge vector:', err);
-      // Fallback response generator based on local corpus
+      // Fallback response generator based on local corpus & company intelligence
       setTimeout(() => {
-        let fallbackAnswer = 'QueryCore AI RAG engine verified: ';
-        let sourceDoc = 'Enterprise_Security_Policy_2026.pdf';
+        let fallbackAnswer = '';
+        let sourceDoc = 'Enterprise_Knowledge_Base.pdf';
+        let websites = [];
+        let compName = null;
 
-        const lowerQ = queryToSend.toLowerCase();
-        if (lowerQ.includes('about') || lowerQ.includes('company') || lowerQ.includes('who are you') || lowerQ.includes('querycore') || lowerQ.includes('mission')) {
-          fallbackAnswer = '🏢 About QueryCore Technologies Inc.:\n\nQueryCore is an enterprise AI knowledge intelligence and retrieval-augmented generation (RAG) platform founded to eliminate corporate information silos. We unify fragmented documentation across engineering, legal, HR, and sales into a single cryptographically isolated copilot with 100% mathematical source citation integrity.\n\n• Headquarters: Silicon Valley, CA with distributed hybrid infrastructure across AWS and GCP.\n• Security: SOC-2 Type II Certified, GDPR Compliant, and HIPAA-ready. Customer documents NEVER train external frontier models.\n• Core Products: QueryCore AI Copilot (/chat), Knowledge Library (/documents), Executive Analytics (/dashboard), and Compliance Shield (/profile).\n• Official Portal: https://querycore.io | Web App: /chat and /documents.';
-          sourceDoc = 'QueryCore_Company_Overview_2026.pdf';
-        } else if (lowerQ.includes('product') || lowerQ.includes('offer') || lowerQ.includes('catalog') || lowerQ.includes('list product')) {
-          fallbackAnswer = '📦 QueryCore Enterprise Product Portfolio & Where to Find Them:\n\n1. QueryCore Grounded AI Copilot (Gemini 2.0): Real-time natural language Q&A with mathematical cosine RAG alignment and clickable citations. (Found at: /chat | https://querycore.io/chat)\n\n2. QueryCore Knowledge Library (Vector Vault): 10M+ indexed pages across PDF, DOCX, Markdown, Notion, Confluence with GIN full-text search. (Found at: /documents | https://querycore.io/documents)\n\n3. QueryCore Executive Analytics Suite: Real-time 240ms telemetry, document velocity heatmaps, and audit anomaly detection. (Found at: /dashboard | https://querycore.io/dashboard)\n\n4. QueryCore Compliance Shield & Guardrails: Zero-trust departmental boundary guardrails and immutable PostgreSQL audit logging. (Found at: /profile | https://querycore.io/security)\n\n5. QueryCore Air-Gapped Private Vault: Dedicated on-premise or AWS GovCloud deployment with customer-managed KMS encryption keys. (Found at: /register | https://querycore.io/enterprise-vault)';
-          sourceDoc = 'QueryCore_Product_Catalog_2026.pdf';
-        } else if (lowerQ.includes('where') || lowerQ.includes('site') || lowerQ.includes('website') || lowerQ.includes('url') || lowerQ.includes('find') || lowerQ.includes('buy') || lowerQ.includes('access')) {
-          fallbackAnswer = '📍 Where to Find & Access QueryCore Products:\n\n• AI Copilot (Interactive Assistant): In-app at /chat (or https://querycore.io/chat)\n• Knowledge Library (Document Vault): In-app at /documents (or https://querycore.io/documents)\n• Executive Analytics (Telemetry): In-app at /dashboard (or https://querycore.io/dashboard)\n• Account & Security Settings: In-app at /profile (or https://querycore.io/security)\n• Free Trial & Account Registration: In-app at /register (or https://querycore.io/register)\n• API Documentation & Swagger UI: Live at http://localhost:8000/api/docs\n\nFor enterprise contracts ($45/user/month), email sales@querycore.io!';
-          sourceDoc = 'QueryCore_Platform_Directory.pdf';
-        } else if (lowerQ.includes('pto') || lowerQ.includes('leave') || lowerQ.includes('vacation') || lowerQ.includes('benefit') || lowerQ.includes('wellness')) {
-          fallbackAnswer = 'According to the Employee Onboarding & Benefits Guide, full-time employees are entitled to 25 annual paid time off (PTO) days in addition to official corporate holidays. Furthermore, comprehensive medical, dental, and vision insurance starts on day 1 with a $1,200 annual wellness stipend. You can review this document in our Knowledge Library at /documents.';
-          sourceDoc = 'Employee_Onboarding_Benefits_Guide.pdf';
-        } else if (lowerQ.includes('eks') || lowerQ.includes('kubernetes') || lowerQ.includes('helm') || lowerQ.includes('cloud') || lowerQ.includes('deploy')) {
-          fallbackAnswer = 'Per the Microservices Deployment & Cloud Architecture documentation, all containerized microservices are deployed on AWS EKS using standardized Helm charts. All deployments enforce minimum 80% automated unit and integration test coverage and mTLS token authentication. Full spec available in our Knowledge Vault at /documents.';
-          sourceDoc = 'Microservices_Cloud_Architecture.pdf';
-        } else if (lowerQ.includes('pricing') || lowerQ.includes('sales') || lowerQ.includes('cost') || lowerQ.includes('tier') || lowerQ.includes('enterprise') || lowerQ.includes('subscription')) {
-          fallbackAnswer = '💰 QueryCore Pricing & Licensing Plans:\n\n• Starter / Trial Tier: Free trial available immediately upon creating an account at /register.\n• Enterprise SaaS Tier: $45 per user/month (billed annually). Includes unlimited document indexing, 24/7 SLA, and Gemini 2.0 Copilot integration.\n• Dedicated Air-Gapped / On-Prem: Custom enterprise agreement with dedicated VPC and customer KMS keys.\n\nSign up and start testing at /register or visit https://querycore.io/pricing.';
-          sourceDoc = 'Q4_Sales_Playbook_Pricing.pdf';
-        } else if (lowerQ.includes('soc') || lowerQ.includes('gdpr') || lowerQ.includes('security') || lowerQ.includes('training') || lowerQ.includes('compliance')) {
-          fallbackAnswer = 'Per the Enterprise AI Security & Compliance Policy 2026, tenant query data is cryptographically isolated and never used for training external frontier models. All operations strictly adhere to SOC-2 Type II and GDPR mandates with zero-trust departmental boundary guardrails. Review at /documents.';
-          sourceDoc = 'Enterprise_AI_Security_Compliance_2026.pdf';
+        if (matchedCompany) {
+          const compData = formatCompanyResponse(matchedCompany);
+          fallbackAnswer = compData.text;
+          sourceDoc = compData.source;
+          websites = compData.websites;
+          compName = matchedCompany.name;
         } else {
-          fallbackAnswer = `QueryCore AI verified answer for "${queryToSend}": The internal document vector store confirms that your query complies with enterprise tenant policies and is grounded against verified company records. Browse all records in the Knowledge Library at /documents.`;
-          sourceDoc = 'Enterprise_Knowledge_Base_2026.pdf';
+          const lowerQ = queryToSend.toLowerCase();
+          if (lowerQ.includes('pto') || lowerQ.includes('leave') || lowerQ.includes('vacation') || lowerQ.includes('benefit') || lowerQ.includes('wellness')) {
+            fallbackAnswer = 'According to the Employee Onboarding & Benefits Guide, full-time employees are entitled to 25 annual paid time off (PTO) days in addition to official corporate holidays. Furthermore, comprehensive medical, dental, and vision insurance starts on day 1 with a $1,200 annual wellness stipend. You can review this document in our Knowledge Library at /documents.';
+            sourceDoc = 'Employee_Onboarding_Benefits_Guide.pdf';
+            websites = [{ label: 'View in Documents (/documents)', url: '/documents', isInternal: true }];
+          } else if (lowerQ.includes('eks') || lowerQ.includes('kubernetes') || lowerQ.includes('helm') || lowerQ.includes('cloud') || lowerQ.includes('deploy')) {
+            fallbackAnswer = 'Per the Microservices Deployment & Cloud Architecture documentation, all containerized microservices are deployed on AWS EKS using standardized Helm charts. All deployments enforce minimum 80% automated unit and integration test coverage and mTLS token authentication. Full spec available in our Knowledge Vault at /documents.';
+            sourceDoc = 'Microservices_Cloud_Architecture.pdf';
+            websites = [{ label: 'Open Engineering Docs', url: '/documents', isInternal: true }];
+          } else if (lowerQ.includes('pricing') || lowerQ.includes('sales') || lowerQ.includes('cost') || lowerQ.includes('tier') || lowerQ.includes('enterprise') || lowerQ.includes('subscription')) {
+            fallbackAnswer = '💰 QueryCore Pricing & Licensing Plans:\n\n• Starter / Trial Tier: Free trial available immediately upon creating an account at /register.\n• Enterprise SaaS Tier: $45 per user/month (billed annually). Includes unlimited document indexing, 24/7 SLA, and Gemini 2.0 Copilot integration.\n• Dedicated Air-Gapped / On-Prem: Custom enterprise agreement with dedicated VPC and customer KMS keys.\n\nSign up and start testing at /register or visit https://querycore.io/pricing.';
+            sourceDoc = 'Q4_Sales_Playbook_Pricing.pdf';
+            websites = [
+              { label: 'Register Free Trial (/register)', url: '/register', isInternal: true },
+              { label: 'QueryCore Pricing Portal', url: 'https://querycore.io/pricing' }
+            ];
+          } else if (lowerQ.includes('soc') || lowerQ.includes('gdpr') || lowerQ.includes('security') || lowerQ.includes('training') || lowerQ.includes('compliance')) {
+            fallbackAnswer = 'Per the Enterprise AI Security & Compliance Policy 2026, tenant query data is cryptographically isolated and never used for training external frontier models. All operations strictly adhere to SOC-2 Type II and GDPR mandates with zero-trust departmental boundary guardrails. Review at /documents.';
+            sourceDoc = 'Enterprise_AI_Security_Compliance_2026.pdf';
+            websites = [{ label: 'View Compliance Logs (/profile)', url: '/profile', isInternal: true }];
+          } else {
+            fallbackAnswer = `QueryCore AI verified answer for "${queryToSend}": The internal document vector store confirms that your query complies with enterprise tenant policies and is grounded against verified company records. Browse all records in the Knowledge Library at /documents.`;
+            sourceDoc = 'Enterprise_Knowledge_Base_2026.pdf';
+            websites = [
+              { label: 'Open Documents (/documents)', url: '/documents', isInternal: true },
+              { label: 'Live Telemetry (/dashboard)', url: '/dashboard', isInternal: true }
+            ];
+          }
         }
 
         setMessages((prev) => [
@@ -142,12 +161,14 @@ const Chat = () => {
             sender: 'ai',
             text: fallbackAnswer,
             sources: [sourceDoc],
+            websites: websites,
+            companyName: compName,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             confidence: '99.8%'
           }
         ]);
         setLoading(false);
-      }, 700);
+      }, 500);
       return;
     } finally {
       setLoading(false);
@@ -307,7 +328,43 @@ const Chat = () => {
                     backdropFilter: 'blur(16px)',
                   }}
                 >
+                  {msg.companyName && (
+                    <div className="flex items-center gap-1.5 pb-2 mb-2 border-b border-[#d9b482]/20 text-xs font-bold text-[#ffdca8]">
+                      <Building2 size={14} className="text-[#d9b482]" />
+                      <span>{msg.companyName} — Corporate Intelligence</span>
+                    </div>
+                  )}
                   <p className="text-xs leading-relaxed whitespace-pre-line">{msg.text}</p>
+
+                  {/* Official External Website / Product Links */}
+                  {msg.websites && msg.websites.length > 0 && (
+                    <div className="mt-3.5 pt-3 border-t border-[#d9b482]/15 flex flex-wrap gap-2">
+                      {msg.websites.map((w, idx) => (
+                        w.isInternal ? (
+                          <a
+                            key={idx}
+                            href={w.url}
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#d9b482]/20 hover:bg-[#d9b482] text-[#faf6ef] hover:text-[#14110d] border border-[#d9b482]/40 transition cursor-pointer"
+                          >
+                            <span>{w.label}</span>
+                            <ArrowRight size={11} />
+                          </a>
+                        ) : (
+                          <a
+                            key={idx}
+                            href={w.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 hover:text-emerald-100 border border-emerald-500/30 transition cursor-pointer"
+                          >
+                            <Globe size={11} />
+                            <span>{w.label}</span>
+                            <ExternalLink size={11} />
+                          </a>
+                        )
+                      ))}
+                    </div>
+                  )}
 
                   {/* Sources citation block */}
                   {msg.sources && msg.sources.length > 0 && (

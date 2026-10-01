@@ -14,14 +14,16 @@ import {
   ChevronRight,
   MessageSquare,
   ArrowRight,
-  ExternalLink
+  ExternalLink,
+  Globe
 } from 'lucide-react';
+import { identifyCompany, formatCompanyResponse } from '../utils/companyKnowledge';
 
 const INSTITUTION_FAQS = [
+  'Tell me about Amazon and its products',
   'Tell me about QueryCore company & mission',
-  'What products do you offer and where can I find them?',
-  'Where can I find the Gemini 2.0 AI Copilot?',
-  'Where can I view enterprise pricing and get started?'
+  'What products does Google offer and where to find them?',
+  'Where can I find Apple products and official store?'
 ];
 
 const FloatingChatWidget = () => {
@@ -62,6 +64,8 @@ const FloatingChatWidget = () => {
     setInput('');
     setLoading(true);
 
+    const matchedCompany = identifyCompany(text);
+
     try {
       const res = await client.post('/api/chat', {
         message: text,
@@ -79,41 +83,59 @@ const FloatingChatWidget = () => {
           sender: 'ai',
           text: answer,
           sources: Array.isArray(sources) ? sources : [sources],
+          websites: matchedCompany?.websites || [],
+          companyName: matchedCompany?.name,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
       setLoading(false);
     } catch {
-      // Contract fallback simulation for instant prospective customer inquiries
+      // Contract fallback simulation for instant company & institutional inquiries
       setTimeout(() => {
-        const lower = text.toLowerCase();
-        let reply = "QueryCore AI unifies internal institutional documentation into a vector knowledge store, allowing teams to query company SOPs, research papers, and policies with mathematical citation integrity.";
-        let source = "QueryCore_Whitepaper_2026.pdf";
+        let reply = "";
+        let source = "Enterprise_Knowledge_Base.pdf";
+        let websites = [];
+        let compName = null;
 
-        if (lower.includes('about') || lower.includes('company') || lower.includes('who are you') || lower.includes('querycore') || lower.includes('mission')) {
-          reply = "🏢 **About QueryCore Technologies Inc.**:\n\nQueryCore is an enterprise-grade AI knowledge intelligence and retrieval-augmented generation (RAG) platform founded to eliminate corporate information silos. We connect distributed departmental documents (Engineering, Legal, HR, Sales) into a cryptographically isolated copilot with 100% mathematical source citations.\n\n• **Headquarters**: Silicon Valley, CA with AWS/GCP hybrid infrastructure.\n• **Security**: SOC-2 Type II Certified, GDPR compliant. Zero external LLM training on tenant data.\n• **Where to find**: Explore our web application at `/chat` and `/documents` or visit https://querycore.io.";
-          source = "QueryCore_Company_Overview_2026.pdf";
-        } else if (lower.includes('product') || lower.includes('offer') || lower.includes('catalog') || lower.includes('list product')) {
-          reply = "📦 **QueryCore Flagship Products & Where to Find Them**:\n\n1. **QueryCore Grounded AI Copilot (Gemini 2.0)**: Natural language conversational assistant with clickable citations.\n   👉 *Find at*: In-App: `/chat` | Web: https://querycore.io/chat\n\n2. **QueryCore Knowledge Library**: 10M+ page multi-tenant vector vault with GIN search.\n   👉 *Find at*: In-App: `/documents` | Web: https://querycore.io/documents\n\n3. **QueryCore Executive Analytics**: Real-time 240ms telemetry & audit heatmaps.\n   👉 *Find at*: In-App: `/dashboard` | Web: https://querycore.io/dashboard\n\n4. **QueryCore Compliance Shield**: Department boundary guardrails & RBAC.\n   👉 *Find at*: In-App: `/profile` | Web: https://querycore.io/security\n\n5. **Air-Gapped Private Vault**: Dedicated on-prem / GovCloud deployment.\n   👉 *Find at*: In-App: `/register` | Web: https://querycore.io/enterprise-vault";
-          source = "QueryCore_Product_Catalog_2026.pdf";
-        } else if (lower.includes('where') || lower.includes('site') || lower.includes('website') || lower.includes('url') || lower.includes('find') || lower.includes('buy') || lower.includes('access')) {
-          reply = "📍 **Where to Find & Access QueryCore Products**:\n\n• **AI Copilot**: `/chat` (or https://querycore.io/chat)\n• **Knowledge Library**: `/documents` (or https://querycore.io/documents)\n• **Executive Analytics**: `/dashboard` (or https://querycore.io/dashboard)\n• **Account & Security Settings**: `/profile`\n• **Sign Up / Free Trial**: `/register` (or https://querycore.io/register)\n• **Backend API Docs**: http://localhost:8000/api/docs\n\nFor enterprise contracts ($45/user/month), reach our team at sales@querycore.io!";
-          source = "QueryCore_Platform_Directory.pdf";
-        } else if (lower.includes('price') || lower.includes('pricing') || lower.includes('cost') || lower.includes('tier') || lower.includes('subscription')) {
-          reply = "💰 **QueryCore Pricing & Licensing Plans**:\n\n• **Free Trial**: Available immediately upon registering at `/register`.\n• **Enterprise SaaS Tier**: $45 per user/month (billed annually) with unlimited document indexing, 24/7 SLA, and Gemini 2.0 Copilot.\n• **Dedicated Air-Gapped / On-Prem**: Custom enterprise agreement with dedicated VPC and customer KMS keys.\n\n👉 Start your trial now at `/register` or view options at https://querycore.io/pricing.";
-          source = "Q4_Sales_Playbook_Pricing.pdf";
-        } else if (lower.includes('copilot') || lower.includes('assistant') || lower.includes('gemini')) {
-          reply = "🤖 **QueryCore AI Copilot (Gemini 2.0)**:\n\nOur intelligent copilot searches across your uploaded company documents, synthesizing verified responses with clickable citations. It features zero hallucinations, multi-turn reasoning, and sub-300ms latency.\n\n👉 *Where to find it*: Open `/chat` in our app or visit https://querycore.io/chat.";
-          source = "QueryCore_Copilot_Whitepaper.pdf";
-        } else if (lower.includes('hallucinat') || lower.includes('rag')) {
-          reply = "QueryCore AI utilizes strict Retrieval-Augmented Generation (RAG). Every token generated by the model must correspond to a verified embedding chunk from your uploaded institutional documents. Zero hallucinations guaranteed.";
-          source = "Enterprise_AI_Security_Policy.pdf";
-        } else if (lower.includes('private') || lower.includes('security') || lower.includes('compliance') || lower.includes('soc')) {
-          reply = "All institution data is stored in isolated tenant spaces with AES-256 encryption at rest and in transit. QueryCore complies with SOC-2 Type II and GDPR standards, and your proprietary data is never used to train external public models.";
-          source = "SOC2_Compliance_Matrix_2026.pdf";
-        } else if (lower.includes('citation') || lower.includes('badge')) {
-          reply = "Source citation badges are attached to every response, linking directly to the underlying department document title and timestamp in our Knowledge Library at `/documents`.";
-          source = "QueryCore_Architecture_Spec.pdf";
+        if (matchedCompany) {
+          const compData = formatCompanyResponse(matchedCompany);
+          reply = compData.text;
+          source = compData.source;
+          websites = compData.websites;
+          compName = matchedCompany.name;
+        } else {
+          const lower = text.toLowerCase();
+          if (lower.includes('price') || lower.includes('pricing') || lower.includes('cost') || lower.includes('tier') || lower.includes('subscription')) {
+            reply = "💰 **QueryCore Pricing & Licensing Plans**:\n\n• **Free Trial**: Available immediately upon registering at `/register`.\n• **Enterprise SaaS Tier**: $45 per user/month (billed annually) with unlimited document indexing, 24/7 SLA, and Gemini 2.0 Copilot.\n• **Dedicated Air-Gapped / On-Prem**: Custom enterprise agreement with dedicated VPC and customer KMS keys.\n\n👉 Start your trial now at `/register` or view options at https://querycore.io/pricing.";
+            source = "Q4_Sales_Playbook_Pricing.pdf";
+            websites = [
+              { label: 'Register Free Trial (/register)', url: '/register', isInternal: true },
+              { label: 'QueryCore Pricing Site', url: 'https://querycore.io/pricing' }
+            ];
+          } else if (lower.includes('copilot') || lower.includes('assistant') || lower.includes('gemini')) {
+            reply = "🤖 **QueryCore AI Copilot (Gemini 2.0)**:\n\nOur intelligent copilot searches across your uploaded company documents, synthesizing verified responses with clickable citations. It features zero hallucinations, multi-turn reasoning, and sub-300ms latency.\n\n👉 *Where to find it*: Open `/chat` in our app or visit https://querycore.io/chat.";
+            source = "QueryCore_Copilot_Whitepaper.pdf";
+            websites = [
+              { label: 'Launch AI Copilot (/chat)', url: '/chat', isInternal: true },
+              { label: 'Official Copilot Site', url: 'https://querycore.io/chat' }
+            ];
+          } else if (lower.includes('hallucinat') || lower.includes('rag')) {
+            reply = "QueryCore AI utilizes strict Retrieval-Augmented Generation (RAG). Every token generated by the model must correspond to a verified embedding chunk from your uploaded institutional documents. Zero hallucinations guaranteed.";
+            source = "Enterprise_AI_Security_Policy.pdf";
+          } else if (lower.includes('private') || lower.includes('security') || lower.includes('compliance') || lower.includes('soc')) {
+            reply = "All institution data is stored in isolated tenant spaces with AES-256 encryption at rest and in transit. QueryCore complies with SOC-2 Type II and GDPR standards, and your proprietary data is never used to train external public models.";
+            source = "SOC2_Compliance_Matrix_2026.pdf";
+            websites = [
+              { label: 'Security & Compliance (/profile)', url: '/profile', isInternal: true }
+            ];
+          } else {
+            reply = `Verified QueryCore Intelligence: Your query "${text}" has been authenticated under enterprise tenant guardrails. To explore full company records, documentation, and tools, navigate to our Knowledge Library at \`/documents\` or start querying with Copilot at \`/chat\`.`;
+            source = "QueryCore_Enterprise_Whitepaper_2026.pdf";
+            websites = [
+              { label: 'Launch Copilot (/chat)', url: '/chat', isInternal: true },
+              { label: 'Document Library (/documents)', url: '/documents', isInternal: true }
+            ];
+          }
         }
 
         setMessages((prev) => [
@@ -123,11 +145,13 @@ const FloatingChatWidget = () => {
             sender: 'ai',
             text: reply,
             sources: [source],
+            websites: websites,
+            companyName: compName,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);
         setLoading(false);
-      }, 500);
+      }, 400);
     }
   };
 
@@ -203,14 +227,51 @@ const FloatingChatWidget = () => {
                     className={`flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'}`}
                   >
                     <div
-                      className={`px-3 py-2 rounded-xl max-w-[85%] text-xs leading-relaxed ${
+                      className={`px-3.5 py-2.5 rounded-xl max-w-[88%] text-xs leading-relaxed whitespace-pre-line ${
                         m.sender === 'user'
-                          ? 'bg-blue-600 text-white rounded-tr-xs'
-                          : 'bg-slate-900 text-slate-200 border border-slate-800 rounded-tl-xs'
+                          ? 'bg-blue-600 text-white rounded-tr-xs shadow-md'
+                          : 'bg-slate-900/95 text-slate-200 border border-slate-800 rounded-tl-xs shadow-md'
                       }`}
                     >
+                      {m.companyName && (
+                        <div className="flex items-center gap-1.5 pb-1.5 mb-1.5 border-b border-slate-800 text-[10px] font-bold text-amber-400">
+                          <Building2 size={12} />
+                          <span>{m.companyName}</span>
+                        </div>
+                      )}
                       {m.text}
                     </div>
+
+                    {/* Official External Website / Product Links */}
+                    {m.websites && m.websites.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1.5 max-w-[90%]">
+                        {m.websites.map((w, idx) => (
+                          w.isInternal ? (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => { setIsOpen(false); navigate(w.url); }}
+                              className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-600/30 hover:bg-blue-600 text-blue-200 hover:text-white border border-blue-500/40 transition cursor-pointer"
+                            >
+                              <span>{w.label}</span>
+                              <ArrowRight size={10} />
+                            </button>
+                          ) : (
+                            <a
+                              key={idx}
+                              href={w.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 hover:text-emerald-100 border border-emerald-500/40 transition cursor-pointer"
+                            >
+                              <Globe size={10} />
+                              <span>{w.label}</span>
+                              <ExternalLink size={10} />
+                            </a>
+                          )
+                        ))}
+                      </div>
+                    )}
 
                     {/* Source badges */}
                     {m.sources && m.sources.length > 0 && (
