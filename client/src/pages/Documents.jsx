@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -56,9 +57,17 @@ const Documents = () => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDept, setSelectedDept] = useState('All');
+  const [selectedDept, setSelectedDept] = useState(() => searchParams.get('dept') || 'All');
   const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    const deptParam = searchParams.get('dept');
+    if (deptParam && DEPARTMENTS.includes(deptParam)) {
+      setSelectedDept(deptParam);
+    }
+  }, [searchParams]);
 
   // Form state
   const [formTitle, setFormTitle] = useState('');
